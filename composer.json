@@ -1,0 +1,16 @@
+{
+  "name": "ochorocho/gitlab-composer",
+  "type": "project",
+  "license": "GPL-3.0-only",
+  "autoload": {
+    "psr-4": {
+      "Gitlab\\": "Gitlab/"
+    }
+  },
+  "bin": [
+    "bin/gitlab-composer"
+  ],
+  "require": {
+    "composer/satis": "^1.0"
+  }
+}
