@@ -1,0 +1,16 @@
+{
+  "name": "My Repository",
+  "homepage": "http://packages.example.org",
+  "repositories": [
+    { "type": "vcs", "url": "../gitlab-composer" }
+  ],
+  "require-all": true,
+  "archive": {
+    "directory": "dist",
+    "format": "tar",
+    "prefix-url": "https://gitlab.knallimall.org/",
+    "skip-dev": true
+  },
+  "output-dir": "build",
+  "output-html": false
+}
