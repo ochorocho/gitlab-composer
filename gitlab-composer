@@ -8,7 +8,12 @@ foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', 
     }
 }
 
-$factory = new Gitlab\Composer();
+//$factory = new Gitlab\Composer\Composer();
+//echo $factory->doStuff("lllllllllll");
+//$build = new \Gitlab\Console\Command\BuildLocalCommand();
 
-echo $factory->doStuff("lllllllllll");
+$application = new Gitlab\Console\Application();
+$application->run();
+
+
 echo "\n";

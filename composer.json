@@ -4,13 +4,14 @@
   "license": "GPL-3.0-only",
   "autoload": {
     "psr-4": {
-      "Gitlab\\": "Gitlab/"
+      "Gitlab\\": "src/"
     }
   },
   "bin": [
     "bin/gitlab-composer"
   ],
   "require": {
-    "composer/satis": "^1.0"
+    "composer/satis": "^1.0",
+    "cpliakas/git-wrapper": "^2.1"
   }
 }
