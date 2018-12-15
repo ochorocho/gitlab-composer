@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+
 foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
     if (file_exists($file)) {
         /** @noinspection PhpIncludeInspection */
@@ -8,12 +9,7 @@ foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', 
     }
 }
 
-//$factory = new Gitlab\Composer\Composer();
-//echo $factory->doStuff("lllllllllll");
-//$build = new \Gitlab\Console\Command\BuildLocalCommand();
-
-$application = new Gitlab\Console\Application();
+$application = new Composer\Satis\Console\Application();
+$application->add(new \Gitlab\Console\Command\BuildLocalCommand());
 $application->run();
 
-
-echo "\n";

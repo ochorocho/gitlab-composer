@@ -8,10 +8,8 @@ use Composer\Config\JsonConfigSource;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use Composer\Satis\Builder\ArchiveBuilder;
-use Composer\Satis\Builder\PackagesBuilder;
-use Composer\Satis\Builder\WebBuilder;
+use Gitlab\Satis\Builder\PackagesBuilder;
 use Composer\Satis\Console\Application;
-use Composer\Satis\Console\Command\BuildCommand;
 use Composer\Satis\PackageSelection\PackageSelection;
 use Composer\Util\RemoteFilesystem;
 use JsonSchema\Validator;
@@ -21,11 +19,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-
 /**
  * @author Jochen ROth <rothjochen@gmail.com>
  */
-class BuildLocalCommand extends BuildCommand
+class BuildLocalCommand extends BaseCommand
 {
     protected function configure()
     {
@@ -79,5 +76,123 @@ The json config file accepts the following keys:
 
 EOT
             );
+    }
+
+    /**
+     * @param InputInterface $input The input instance
+     * @param OutputInterface $output The output instance
+     *
+     * @throws JsonValidationException
+     * @throws ParsingException
+     * @throws \Exception
+     *
+     * @return int
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        // var_dump($this->getConfiguration());
+        $verbose = $input->getOption('verbose');
+        $configFile = $input->getArgument('file');
+        $packagesFilter = $input->getArgument('packages');
+        $repositoryUrl = $input->getOption('repository-url');
+        $skipErrors = (bool) $input->getOption('skip-errors');
+
+        // load auth.json authentication information and pass it to the io interface
+        $io = $this->getIO();
+        $io->loadConfiguration($this->getConfiguration());
+
+        if (preg_match('{^https?://}i', $configFile)) {
+            $rfs = new RemoteFilesystem($io);
+            $contents = $rfs->getContents(parse_url($configFile, PHP_URL_HOST), $configFile, false);
+            $config = JsonFile::parseJson($contents, $configFile);
+        } else {
+            $file = new JsonFile($configFile);
+            if (!$file->exists()) {
+                $output->writeln('<error>File not found: ' . $configFile . '</error>');
+
+                return 1;
+            }
+            $config = $file->read();
+        }
+
+        // disable packagist by default
+        unset(Config::$defaultRepositories['packagist'], Config::$defaultRepositories['packagist.org']);
+
+        if (!$outputDir = $input->getArgument('output-dir')) {
+            $outputDir = isset($config['output-dir']) ? $config['output-dir'] : null;
+        }
+
+        if (null === $outputDir) {
+            throw new \InvalidArgumentException('The output dir must be specified as second argument or be configured inside ' . $input->getArgument('file'));
+        }
+
+        /** @var $application Application */
+        $application = $this->getApplication();
+        $composer = $application->getComposer(true, $config);
+        $packageSelection = new PackageSelection($output, $outputDir, $config, $skipErrors);
+
+        if ($repositoryUrl !== null) {
+            $packageSelection->setRepositoryFilter($repositoryUrl);
+        } else {
+            $packageSelection->setPackagesFilter($packagesFilter);
+        }
+
+        $packages = $packageSelection->select($composer, $verbose);
+
+        if (isset($config['archive']['directory'])) {
+            $downloads = new ArchiveBuilder($output, $outputDir, $config, $skipErrors);
+            $downloads->setComposer($composer);
+            $downloads->setInput($input);
+            $downloads->dump($packages);
+        }
+
+        $packagesBuilder = new PackagesBuilder($output, $outputDir, $config, $skipErrors);
+        $packagesBuilder->dump($packages);
+
+    }
+
+    /**
+     * @return Config
+     */
+    private function getConfiguration()
+    {
+        $config = new Config();
+
+        // add dir to the config
+        $config->merge(['config' => ['home' => $this->getComposerHome()]]);
+
+        // load global auth file
+        $file = new JsonFile($config->get('home') . '/auth.json');
+        if ($file->exists()) {
+            $config->merge(['config' => $file->read()]);
+        }
+        $config->setAuthConfigSource(new JsonConfigSource($file, true));
+
+        return $config;
+    }
+
+    /**
+     * @throws \RuntimeException
+     *
+     * @return string
+     */
+    private function getComposerHome()
+    {
+        $home = getenv('COMPOSER_HOME');
+        if (!$home) {
+            if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
+                if (!getenv('APPDATA')) {
+                    throw new \RuntimeException('The APPDATA or COMPOSER_HOME environment variable must be set for composer to run correctly');
+                }
+                $home = strtr(getenv('APPDATA'), '\\', '/') . '/Composer';
+            } else {
+                if (!getenv('HOME')) {
+                    throw new \RuntimeException('The HOME or COMPOSER_HOME environment variable must be set for composer to run correctly');
+                }
+                $home = rtrim(getenv('HOME'), '/') . '/.composer';
+            }
+        }
+
+        return $home;
     }
 }
