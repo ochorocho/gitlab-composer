@@ -27,11 +27,7 @@ class Application extends BaseApplication
     protected function getDefaultCommands()
     {
         $commands = array_merge(parent::getDefaultCommands(), [
-            new Command\InitCommand(),
-            new Command\AddCommand(),
-            new Command\BuildCommand(),
             new GitlabCommand\BuildLocalCommand(),
-            new Command\PurgeCommand(),
         ]);
 
         return $commands;
