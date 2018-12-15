@@ -10,12 +10,9 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
     echo $'memory_limit = 1024M\nextension=yaml.so' >> /etc/php7/php.ini && \
 # Cleanup image
     apk del make git g++ gcc binutils curl && \
-    rm -rf /var/cache/apk/*
-
-
-
+    rm -rf /var/cache/apk/* && \
 # Link Binary
-#    ln -s /gitlab-pages-satis/bin/gitlab-pages-satis /usr/bin/gitlab-pages-satis
+    ln -s /gitlab-composer/gitlab-composer /usr/bin/gitlab-composer
 
 COPY . /gitlab-composer
 WORKDIR /gitlab-composer/

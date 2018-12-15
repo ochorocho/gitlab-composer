@@ -2,7 +2,10 @@
   "name": "My Repository",
   "homepage": "http://packages.example.org",
   "repositories": [
-    { "type": "vcs", "url": "../gitlab-composer" }
+    {
+      "type": "vcs",
+      "url": "../gitlab-composer"
+    }
   ],
   "require-all": true,
   "archive": {

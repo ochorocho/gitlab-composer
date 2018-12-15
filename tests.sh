@@ -1,5 +1,6 @@
 #!/bin/bash
 
 # some commands must be executable
-vendor/bin/satis --version || exit 1
-vendor/bin/composer --version || exit 1
+/gitlab-composer/gitlab-composer --version || exit 1
+/gitlab-composer/vendor/bin/satis --version || exit 1
+/gitlab-composer/vendor/bin/composer --version || exit 1
