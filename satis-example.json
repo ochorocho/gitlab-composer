@@ -7,14 +7,17 @@
       "url": "./"
     }
   ],
-  "include-filename": "include/gitlab-composer$%hash%.json",
+  "include-filename": "gitlab-composer$%hash%.json",
   "require-all": true,
   "archive": {
-    "directory": "dist",
+    "directory": "./",
     "format": "tar",
     "prefix-url": "https://gitlab.knallimall.org/",
     "skip-dev": false
   },
   "output-dir": "build",
-  "output-html": false
+  "output-html": false,
+  "abandoned": {
+    "gitlab-composer": true
+  }
 }

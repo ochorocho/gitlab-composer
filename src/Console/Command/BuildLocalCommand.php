@@ -2,26 +2,25 @@
 
 namespace Gitlab\Console\Command;
 
+use Composer\IO\NullIO;
 use Composer\Command\BaseCommand;
 use Composer\Config;
 use Composer\Config\JsonConfigSource;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
-use Composer\Repository\VcsRepository;
 use Composer\Satis\Builder\ArchiveBuilder;
-use Gitlab\Satis\Builder\PackagesBuilder;
+use Composer\Util\ProcessExecutor;
+use Composer\Satis\Builder\PackagesBuilder;
 use Composer\Satis\Console\Application;
 use Composer\Satis\PackageSelection\PackageSelection;
 use Composer\Util\RemoteFilesystem;
-use JsonSchema\Validator;
-use Seld\JsonLint\JsonParser;
 use Seld\JsonLint\ParsingException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 /**
- * @author Jochen ROth <rothjochen@gmail.com>
+ * @author Jochen Roth <rothjochen@gmail.com>
  */
 class BuildLocalCommand extends BaseCommand
 {
@@ -91,7 +90,6 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // var_dump($this->getConfiguration());
         $verbose = $input->getOption('verbose');
         $configFile = $input->getArgument('file');
         $packagesFilter = $input->getArgument('packages');
@@ -140,20 +138,34 @@ EOT
 
         $packages = $packageSelection->select($composer, $verbose);
 
-
+        /**
+         * Set git repo url as source
+         */
+        $process = new ProcessExecutor($io);
 
         foreach ($packages as $package) {
-            $package->setSourceUrl(exec("git remote get-url --all origin"));
+            $process->execute("git remote get-url --all origin", $url);
+            $package->setSourceUrl($url);
         }
 
-
+        /**
+         * Download tar files
+         */
         $downloads = new ArchiveBuilder($output, $outputDir, $config, $skipErrors);
         $downloads->setComposer($composer);
         $downloads->setInput($input);
         $downloads->dump($packages);
 
+        /**
+         * Build Package based include file
+         */
         $packagesBuilder = new PackagesBuilder($output, $outputDir, $config, $skipErrors);
         $packagesBuilder->dump($packages);
+
+        /**
+         * Delete packages.json
+         */
+        unlink($config['output-dir'] . "/packages.json");
 
     }
 
