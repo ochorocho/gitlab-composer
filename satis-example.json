@@ -1,22 +1,18 @@
 {
-  "name": "My Repository",
-  "homepage": "http://packages.example.org",
   "repositories": [
     {
       "type": "vcs",
       "url": "./"
     }
   ],
-  "include-filename": "gitlab-composer$%hash%.json",
   "require-all": true,
   "archive": {
-    "directory": "./",
+    "directory": "package",
     "format": "tar",
-    "prefix-url": "https://gitlab.knallimall.org/",
+    "prefix-url": "https://gitlab.knallimall.org",
     "skip-dev": false
   },
   "output-dir": "build",
-  "output-html": false,
   "abandoned": {
     "gitlab-composer": true
   }

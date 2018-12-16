@@ -2,7 +2,6 @@
 
 namespace Gitlab\Console\Command;
 
-use Composer\IO\NullIO;
 use Composer\Command\BaseCommand;
 use Composer\Config;
 use Composer\Config\JsonConfigSource;
@@ -10,7 +9,7 @@ use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use Composer\Satis\Builder\ArchiveBuilder;
 use Composer\Util\ProcessExecutor;
-use Composer\Satis\Builder\PackagesBuilder;
+use Gitlab\Builder\PackagesBuilder;
 use Composer\Satis\Console\Application;
 use Composer\Satis\PackageSelection\PackageSelection;
 use Composer\Util\RemoteFilesystem;
@@ -32,9 +31,7 @@ class BuildLocalCommand extends BaseCommand
             ->setDefinition([
                 new InputArgument('file', InputArgument::OPTIONAL, 'Json file to use', './satis.json'),
                 new InputArgument('output-dir', InputArgument::OPTIONAL, 'Location where to output built files', null),
-                new InputArgument('packages', InputArgument::IS_ARRAY | InputArgument::OPTIONAL, 'Packages that should be built, if not provided all packages are.', null),
-                new InputOption('repository-url', null, InputOption::VALUE_OPTIONAL, 'Only update the repository at given url', null),
-                new InputOption('no-html-output', null, InputOption::VALUE_NONE, 'Turn off HTML view'),
+                new InputOption('version-to-dump', null, InputOption::VALUE_OPTIONAL, 'Only update the repository at given url', 'dev-master'),
                 new InputOption('skip-errors', null, InputOption::VALUE_NONE, 'Skip Download or Archive errors'),
                 new InputOption('stats', null, InputOption::VALUE_NONE, 'Display the download progress bar'),
             ])
@@ -65,10 +62,6 @@ The json config file accepts the following keys:
   but requires dev requirements rather than regular ones.
 - <info>"config"</info>: all config options from composer, see
   http://getcomposer.org/doc/04-schema.md#config
-- <info>"name"</info>: for html output, this defines the name of the
-  repository.
-- <info>"homepage"</info>: for html output, this defines the home URL
-  of the repository (where you will host it).
 - <info>"abandoned"</info>: Packages that are abandoned. As the key use the
   package name, as the value use true or the replacement package.
 - <info>"include-filename"</info> Specify filename instead of default include/all${SHA1_HASH}.json
@@ -92,8 +85,6 @@ EOT
     {
         $verbose = $input->getOption('verbose');
         $configFile = $input->getArgument('file');
-        $packagesFilter = $input->getArgument('packages');
-        $repositoryUrl = $input->getOption('repository-url');
         $skipErrors = (bool) $input->getOption('skip-errors');
 
         // load auth.json authentication information and pass it to the io interface
@@ -130,22 +121,25 @@ EOT
         $composer = $application->getComposer(true, $config);
         $packageSelection = new PackageSelection($output, $outputDir, $config, $skipErrors);
 
-        if ($repositoryUrl !== null) {
-            $packageSelection->setRepositoryFilter($repositoryUrl);
-        } else {
-            $packageSelection->setPackagesFilter($packagesFilter);
-        }
-
         $packages = $packageSelection->select($composer, $verbose);
 
         /**
          * Set git repo url as source
+         * Limit to given version/tag
          */
         $process = new ProcessExecutor($io);
 
-        foreach ($packages as $package) {
+        if (!$versionToBuild = $input->getOption('version-to-dump')) {
+            $versionToBuild = isset($config['version-to-dump']) ? $config['version-to-dump'] : null;
+        }
+
+        foreach ($packages as $key => $package) {
             $process->execute("git remote get-url --all origin", $url);
-            $package->setSourceUrl($url);
+            $package->setSourceUrl(str_replace("\n", '', $url));
+
+            if($package->getPrettyVersion() !== $versionToBuild) {
+              unset($packages[$key]);
+            }
         }
 
         /**
@@ -161,11 +155,6 @@ EOT
          */
         $packagesBuilder = new PackagesBuilder($output, $outputDir, $config, $skipErrors);
         $packagesBuilder->dump($packages);
-
-        /**
-         * Delete packages.json
-         */
-        unlink($config['output-dir'] . "/packages.json");
 
     }
 
