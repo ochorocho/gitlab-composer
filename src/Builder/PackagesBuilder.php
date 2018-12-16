@@ -180,7 +180,7 @@ class PackagesBuilder extends Builder
 
             foreach ($packages as $package) {
                 foreach ($package as $version) {
-                    $path = $tmpPath = $this->outputDir . '/package/' . ltrim('version-' .$version['version'] . '.json', '/');
+                    $path = $tmpPath = $this->outputDir . '/' . ltrim('version-' .$version['version'] . '.json', '/');
 
                     $ref = $version['version'];
                     $version = $repoJson->encode([$version['version'] => $version]) . "\n";

@@ -7,13 +7,10 @@
   ],
   "require-all": true,
   "archive": {
-    "directory": "package",
+    "directory": "composer/packages",
     "format": "tar",
     "prefix-url": "https://gitlab.knallimall.org",
     "skip-dev": false
   },
-  "output-dir": "build",
-  "abandoned": {
-    "gitlab-composer": true
-  }
+  "output-dir": "build"
 }
