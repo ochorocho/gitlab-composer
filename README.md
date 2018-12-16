@@ -2,7 +2,10 @@
 
 ## What it does
 
-Generates  
+Generates an archive and a JSON file for a single package tag/branch.
+Does the same as Satis but only for a single package and tag.   
+
+This is using Composer and Satis in the background.
 
 ## Run command
 
