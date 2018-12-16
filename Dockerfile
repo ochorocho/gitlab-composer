@@ -9,7 +9,7 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
 # Configure php.ini
     echo $'memory_limit = 1024M\nextension=yaml.so' >> /etc/php7/php.ini && \
 # Cleanup image
-    apk del make git g++ gcc binutils curl && \
+    apk del make g++ gcc binutils && \
     rm -rf /var/cache/apk/* && \
 # Link Binary
     ln -s /gitlab-composer/gitlab-composer /usr/bin/gitlab-composer
