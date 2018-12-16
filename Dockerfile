@@ -6,6 +6,8 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
     pecl channel-update pecl.php.net && \
 # Install yaml - no prompt
     yes '' | pecl install http://pecl.php.net/get/yaml && \
+# Install Composer
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer && \
 # Configure php.ini
     echo $'memory_limit = 1024M\nextension=yaml.so' >> /etc/php7/php.ini && \
 # Cleanup image
@@ -15,4 +17,8 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
     ln -s /gitlab-composer/gitlab-composer /usr/bin/gitlab-composer
 
 COPY . /gitlab-composer
+
+# Install composer packages
+RUN cd /gitlab-composer && composer install
+
 WORKDIR /gitlab-composer/
