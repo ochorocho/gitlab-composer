@@ -11,7 +11,6 @@
     "bin/gitlab-composer"
   ],
   "require": {
-    "composer/satis": "^1.0",
-    "cpliakas/git-wrapper": "^2.1"
+    "composer/satis": "^1.0"
   }
 }

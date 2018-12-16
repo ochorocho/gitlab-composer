@@ -46,6 +46,7 @@ Class PackagesBuilder extends Builder {
         }
 
         $repo = ['packages' => []];
+
         if (isset($this->config['providers']) && $this->config['providers']) {
             $providersUrl = 'p/%package%$%hash%.json';
             if (!empty($this->config['homepage'])) {
@@ -62,9 +63,11 @@ Class PackagesBuilder extends Builder {
                 }
             }
             // Dump the packages along with packages they're replaced by
+
             foreach ($packagesByName as $packageName => $versionPackages) {
                 $dumpPackages = $this->findReplacements($packagesByName, $packageName);
                 $dumpPackages[$packageName] = $versionPackages;
+
                 $includes = $this->dumpPackageIncludeJson(
                     $dumpPackages,
                     str_replace('%package%', $packageName, $providersUrl),
@@ -75,6 +78,8 @@ Class PackagesBuilder extends Builder {
         } else {
             $repo['includes'] = $this->dumpPackageIncludeJson($packagesByName, $this->includeFileName);
         }
+
+
     }
 
     /**
@@ -88,6 +93,7 @@ Class PackagesBuilder extends Builder {
      */
     public function dumpPackageIncludeJson(array $packages, $includesUrl, $hashAlgorithm = 'sha1')
     {
+
 
         $filename = str_replace('%hash%', 'prep', $this->includeFileName);
         $path = $tmpPath = $this->outputDir . '/' . ltrim($filename, '/');

@@ -4,15 +4,16 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "../gitlab-composer"
+      "url": "./"
     }
   ],
+  "include-filename": "include/gitlab-composer$%hash%.json",
   "require-all": true,
   "archive": {
     "directory": "dist",
     "format": "tar",
     "prefix-url": "https://gitlab.knallimall.org/",
-    "skip-dev": true
+    "skip-dev": false
   },
   "output-dir": "build",
   "output-html": false

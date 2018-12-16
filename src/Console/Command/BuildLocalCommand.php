@@ -7,6 +7,7 @@ use Composer\Config;
 use Composer\Config\JsonConfigSource;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
+use Composer\Repository\VcsRepository;
 use Composer\Satis\Builder\ArchiveBuilder;
 use Gitlab\Satis\Builder\PackagesBuilder;
 use Composer\Satis\Console\Application;
@@ -139,12 +140,17 @@ EOT
 
         $packages = $packageSelection->select($composer, $verbose);
 
-        if (isset($config['archive']['directory'])) {
-            $downloads = new ArchiveBuilder($output, $outputDir, $config, $skipErrors);
-            $downloads->setComposer($composer);
-            $downloads->setInput($input);
-            $downloads->dump($packages);
+
+
+        foreach ($packages as $package) {
+            $package->setSourceUrl(exec("git remote get-url --all origin"));
         }
+
+
+        $downloads = new ArchiveBuilder($output, $outputDir, $config, $skipErrors);
+        $downloads->setComposer($composer);
+        $downloads->setInput($input);
+        $downloads->dump($packages);
 
         $packagesBuilder = new PackagesBuilder($output, $outputDir, $config, $skipErrors);
         $packagesBuilder->dump($packages);
