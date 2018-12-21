@@ -10,7 +10,8 @@
     "directory": "composer/packages",
     "format": "tar",
     "prefix-url": "https://gitlab.knallimall.org",
-    "skip-dev": false
+    "skip-dev": false,
+    "absolute-directory": "build"
   },
   "output-dir": "build"
 }
