@@ -11,5 +11,6 @@ foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', 
 
 $application = new Composer\Satis\Console\Application();
 $application->add(new \Gitlab\Console\Command\BuildLocalCommand());
+$application->add(new \Gitlab\Console\Command\PublishCommand());
 $application->run();
 
