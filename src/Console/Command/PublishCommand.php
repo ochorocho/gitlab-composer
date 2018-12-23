@@ -18,6 +18,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\Stream\Stream;
 
 /**
  * @author Jochen Roth <rothjochen@gmail.com>
@@ -30,7 +32,8 @@ class PublishCommand extends BaseCommand
             ->setName('publish')
             ->setDescription('Publish package to gitlab')
             ->setDefinition([
-                new InputArgument('gitlab-url', InputArgument::REQUIRED, 'Gitlab url to push package', null),
+                new InputArgument('file', InputArgument::OPTIONAL, 'Json file to use', './satis.json'),
+                new InputOption('gitlab-url', InputArgument::REQUIRED, InputOption::VALUE_OPTIONAL, 'Gitlab url to push package', 'https://www.gitlab.com'),
                 new InputOption('build-upload-dir', null, InputOption::VALUE_OPTIONAL, 'Directory containing files for upload', 'build'),
 
             ])
@@ -55,73 +58,88 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $url = $input->getArgument('gitlab-url');
+        // $url = $input->getArgument('gitlab-url');
         $uploadDir = $input->getOption('build-upload-dir');
+        $satis = $this->getSatisConfiguration($input);
 
+        /**
+         * Find files to upload
+         */
+        $files = $this->findFilesForUpload((string)$uploadDir);
+
+        $output->writeln('About to Publish following files ...');
+        foreach ($files as $file) {
+            $output->writeln("\t$file");
+
+            // Build attachments to send
+            $attachments[] = [
+                'contents' => base64_encode(file_get_contents($file)),
+                'filename' => basename($file),
+                'length' => filesize($file)
+            ];
+        }
+
+        /**
+         * Upload files
+         */
+        $client = new Client([
+            'timeout' => 20.0,
+        ]);
+
+        /**
+         * Build Gitlab request
+         */
+        $response = $client->request(
+            'PUT',
+            'http://localhost:3001/api/v4/projects/24/packages/composer/my_nice_package', [
+                'body' => json_encode([
+                    'name' => 'vendor/my-package',
+                    'version' => '1.1.666',
+                    'attachments' => $attachments,
+                ]),
+                'query' => [
+                    'private_token' => $satis['token']
+                ]
+            ]
+        );
+
+        if ($response->getStatusCode() == 200) {
+            $output->writeln('Package published ...');
+        }
+
+    }
+
+    /**
+     * Get Satis local project configuration
+     *
+     * @param InputInterface $input The input instance
+     */
+    private function getSatisConfiguration(InputInterface $input)
+    {
+        $satisConfig = new JsonFile($input->getArgument('file'));
+        $satisConfig = $satisConfig->read();
+        return $satisConfig;
+    }
+
+    /**
+     * Find all files needed for this package
+     *
+     * @param string $uploadDir
+     */
+    private function findFilesForUpload($uploadDir) {
         $dirs = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($uploadDir));
-
         $files = array();
 
         foreach ($dirs as $file) {
-            if ($file->isDir()){
+            if ($file->isDir()) {
                 continue;
             }
 
-            // Load only specific mime types
             if (preg_match("/\.(json|tar|zip)*$/i", $file, $matches)) {
                 $files[] = $file->getPathname();
             }
         }
-
-        var_dump($files);
-
-        // load auth.json authentication information and pass it to the io interface
-        $io = $this->getIO();
-        $io->loadConfiguration($this->getConfiguration());
+        return $files;
     }
 
-    /**
-     * @return Config
-     */
-    private function getConfiguration()
-    {
-        $config = new Config();
-
-        // add dir to the config
-        $config->merge(['config' => ['home' => $this->getComposerHome()]]);
-
-        // load global auth file
-        $file = new JsonFile($config->get('home') . '/auth.json');
-        if ($file->exists()) {
-            $config->merge(['config' => $file->read()]);
-        }
-        $config->setAuthConfigSource(new JsonConfigSource($file, true));
-
-        return $config;
-    }
-
-    /**
-     * @throws \RuntimeException
-     *
-     * @return string
-     */
-    private function getComposerHome()
-    {
-        $home = getenv('COMPOSER_HOME');
-        if (!$home) {
-            if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
-                if (!getenv('APPDATA')) {
-                    throw new \RuntimeException('The APPDATA or COMPOSER_HOME environment variable must be set for composer to run correctly');
-                }
-                $home = strtr(getenv('APPDATA'), '\\', '/') . '/Composer';
-            } else {
-                if (!getenv('HOME')) {
-                    throw new \RuntimeException('The HOME or COMPOSER_HOME environment variable must be set for composer to run correctly');
-                }
-                $home = rtrim(getenv('HOME'), '/') . '/.composer';
-            }
-        }
-
-        return $home;
-    }
 }

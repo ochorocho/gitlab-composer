@@ -13,5 +13,6 @@
     "skip-dev": false,
     "absolute-directory": "build"
   },
-  "output-dir": "build"
+  "output-dir": "build",
+  "token": "PRIVATE_TOKEN"
 }
