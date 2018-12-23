@@ -67,7 +67,7 @@ EOT
          */
         $files = $this->findFilesForUpload((string)$uploadDir);
 
-        $output->writeln('About to Publish following files ...');
+        $output->writeln("\n<options=bold,underscore>About to Publish following files ...</>");
         foreach ($files as $file) {
             $output->writeln("\t$file");
 
@@ -78,6 +78,9 @@ EOT
                 'length' => filesize($file)
             ];
         }
+
+        $composer = new JsonFile($satis['repositories'][0]['url'] . 'composer.json');
+        $composer = $composer->read();
 
         /**
          * Upload files
@@ -93,7 +96,7 @@ EOT
             'PUT',
             'http://localhost:3001/api/v4/projects/24/packages/composer/my_nice_package', [
                 'body' => json_encode([
-                    'name' => 'vendor/my-package',
+                    'name' => $composer['name'],
                     'version' => '1.1.666',
                     'attachments' => $attachments,
                 ]),
@@ -104,7 +107,7 @@ EOT
         );
 
         if ($response->getStatusCode() == 200) {
-            $output->writeln('Package published ...');
+            $output->writeln('<info>Package ' . $composer['name'] . ' published ...</info>');
         }
 
     }
@@ -117,8 +120,7 @@ EOT
     private function getSatisConfiguration(InputInterface $input)
     {
         $satisConfig = new JsonFile($input->getArgument('file'));
-        $satisConfig = $satisConfig->read();
-        return $satisConfig;
+        return $satisConfig->read();
     }
 
     /**
@@ -126,7 +128,8 @@ EOT
      *
      * @param string $uploadDir
      */
-    private function findFilesForUpload($uploadDir) {
+    private function findFilesForUpload($uploadDir)
+    {
         $dirs = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($uploadDir));
         $files = array();
 
