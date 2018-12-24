@@ -40,7 +40,8 @@ class PublishCommand extends BaseCommand
             ->setHelp(<<<'EOT'
 The <info>publish</info> command will push a generated archive and its json to a Gitlab instance.
 
-- <info>"gitlab-url"</info>: Gitlab url to push packages
+- <info>"--gitlab-url"</info>: Gitlab url to push packages
+- <info>"--build-upload-dir"</info>: Directory containing files for upload
 
 EOT
             );
@@ -58,9 +59,17 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // $url = $input->getArgument('gitlab-url');
         $uploadDir = $input->getOption('build-upload-dir');
         $satis = $this->getSatisConfiguration($input);
+        $privateToken = getenv('PRIVATE_TOKEN');
+        $projectId = getenv('CI_PROJECT_ID');
+        $projectUrl = parse_url(getenv('CI_PROJECT_URL'));
+        $projectUrl = $projectUrl['scheme'] . "://" . $projectUrl['host'] . ':' . $projectUrl['port'];
+
+        if (empty($projectId)) {
+            $output->writeln("<error>Env CI_PROJECT_ID not set</error>");
+            return;
+        }
 
         /**
          * Find files to upload
@@ -72,7 +81,7 @@ EOT
         foreach ($files as $file) {
             $output->writeln("\t$file");
 
-            if(preg_match('/.json$/', $file, $fileMatches)) {
+            if (preg_match('/.json$/', $file, $fileMatches)) {
                 preg_match('/version-(.*).json$/', $file, $packageVersion);
                 $packageJson = new JsonFile($file);
                 $packageJson = $packageJson->read();
@@ -90,18 +99,18 @@ EOT
         $composer = $composer->read();
 
         /**
-         * Upload files
+         * Build Gitlab request
          */
         $client = new Client([
             'timeout' => 20.0,
         ]);
 
-        /**
-         * Build Gitlab request
-         */
+        $packageName = urlencode($composer['name']);
+        $apiUrl = $projectUrl . '/api/v4/projects/' . $projectId . "/packages/composer/" . $packageName;
+
         $response = $client->request(
             'PUT',
-            'http://localhost:3001/api/v4/projects/24/packages/composer/my_nice_package', [
+            $apiUrl, [
                 'body' => json_encode([
                     'name' => $composer['name'],
                     'version' => $packageVersion[1],
@@ -110,7 +119,7 @@ EOT
                     'attachments' => $attachments,
                 ]),
                 'query' => [
-                    'private_token' => $satis['token']
+                    'private_token' => $privateToken
                 ]
             ]
         );

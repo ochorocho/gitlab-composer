@@ -97,18 +97,10 @@ EOT
         // disable packagist by default
         unset(Config::$defaultRepositories['packagist'], Config::$defaultRepositories['packagist.org']);
 
-        if (!$outputDir = $input->getArgument('output-dir')) {
-            $outputDir = isset($config['output-dir']) ? $config['output-dir'] : null;
-        }
-
-        if (null === $outputDir) {
-            throw new \InvalidArgumentException('The output dir must be specified as second argument or be configured inside ' . $input->getArgument('file'));
-        }
-
         /** @var $application Application */
         $application = $this->getApplication();
         $composer = $application->getComposer(true, $config);
-        $packageSelection = new PackageSelection($output, $outputDir, $config, $skipErrors);
+        $packageSelection = new PackageSelection($output, null, $config, $skipErrors);
 
         $packages = $packageSelection->select($composer, $verbose);
 
@@ -134,7 +126,7 @@ EOT
         /**
          * Download tar files
          */
-        $downloads = new ArchiveBuilder($output, $outputDir, $config, $skipErrors);
+        $downloads = new ArchiveBuilder($output, null, $config, $skipErrors);
         $downloads->setComposer($composer);
         $downloads->setInput($input);
         $downloads->dump($packages);
@@ -142,7 +134,7 @@ EOT
         /**
          * Build Package based include file
          */
-        $packagesBuilder = new PackagesBuilder($output, $outputDir, $config, $skipErrors);
+        $packagesBuilder = new PackagesBuilder($output, null, $config, $skipErrors);
         $packagesBuilder->dump($packages);
 
     }

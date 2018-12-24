@@ -7,12 +7,8 @@
   ],
   "require-all": true,
   "archive": {
-    "directory": "composer/packages",
     "format": "tar",
-    "prefix-url": "https://gitlab.knallimall.org",
     "skip-dev": false,
     "absolute-directory": "build"
-  },
-  "output-dir": "build",
-  "token": "PRIVATE_TOKEN"
+  }
 }

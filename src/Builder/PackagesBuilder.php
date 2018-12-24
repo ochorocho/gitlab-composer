@@ -12,6 +12,7 @@
 namespace Gitlab\Builder;
 
 use Composer\Satis\Builder\Builder;
+use Composer\Satis\Builder\PackagesBuilder as SatisPackagesBuilder;
 use Composer\Json\JsonFile;
 use Composer\Package\Dumper\ArrayDumper;
 use Composer\Util\Filesystem;
@@ -22,30 +23,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author James Hautot <james@rezo.net>
  */
-class PackagesBuilder extends Builder
+class PackagesBuilder extends SatisPackagesBuilder
 {
-    /** @var string packages.json file name. */
-    private $filename;
 
     /** @var string included json filename template */
     private $includeFileName;
 
     private $writtenIncludeJsons = [];
-
-    /**
-     * Dedicated Packages Constructor.
-     *
-     * @param OutputInterface $output     The output Interface
-     * @param string          $outputDir  The directory where to build
-     * @param array           $config     The parameters from ./satis.json
-     * @param bool            $skipErrors Escapes Exceptions if true
-     */
-    public function __construct(OutputInterface $output, $outputDir, $config, $skipErrors)
-    {
-        parent::__construct($output, $outputDir, $config, $skipErrors);
-
-        $this->filename = $this->outputDir . '/packages.json';
-    }
 
     /**
      * Builds the JSON stuff of the repository.
@@ -95,29 +79,6 @@ class PackagesBuilder extends Builder
     }
 
     /**
-     * Find packages replacing the $replaced packages
-     *
-     * @param array $packages
-     * @param string $replaced
-     *
-     * @return array
-     */
-    private function findReplacements($packages, $replaced)
-    {
-        $replacements = [];
-        foreach ($packages as $packageName => $packageConfig) {
-            foreach ($packageConfig as $versionConfig) {
-                if (!empty($versionConfig['replace']) && array_key_exists($replaced, $versionConfig['replace'])) {
-                    $replacements[$packageName] = $packageConfig;
-                    break;
-                }
-            }
-        }
-
-        return $replacements;
-    }
-
-    /**
      * Remove all files matching the includeUrl pattern next to just created include jsons
      */
     private function pruneIncludeDirectories()
@@ -147,6 +108,7 @@ class PackagesBuilder extends Builder
             }
         }
     }
+
 
     /**
      * Writes includes JSON Files.
@@ -181,7 +143,7 @@ class PackagesBuilder extends Builder
             foreach ($packages as $package) {
                 foreach ($package as $version) {
 
-                    $path = $tmpPath = $this->outputDir . '/' . $version['name'] . '/' . ltrim('version-' .$version['version'] . '.json', '/');
+                    $path = $this->config['archive']['absolute-directory'] . '/' . $version['name'] . '/' . ltrim('version-' .$version['version'] . '.json', '/');
 
                     $ref = $version['version'];
                     $version = $repoJson->encode([$version['version'] => $version]) . "\n";
@@ -190,8 +152,6 @@ class PackagesBuilder extends Builder
                 }
             }
         }
-
-
 
         return [
             $filename => [$hashAlgorithm => $hash],
@@ -240,18 +200,26 @@ class PackagesBuilder extends Builder
     }
 
     /**
-     * Writes the packages.json of the repository.
+     * Find packages replacing the $replaced packages
      *
-     * @param array $repo Repository information
+     * @param array $packages
+     * @param string $replaced
+     *
+     * @return array
      */
-    private function dumpPackagesJson($repo)
+    private function findReplacements($packages, $replaced)
     {
-        if (isset($this->config['notify-batch'])) {
-            $repo['notify-batch'] = $this->config['notify-batch'];
+        $replacements = [];
+        foreach ($packages as $packageName => $packageConfig) {
+            foreach ($packageConfig as $versionConfig) {
+                if (!empty($versionConfig['replace']) && array_key_exists($replaced, $versionConfig['replace'])) {
+                    $replacements[$packageName] = $packageConfig;
+                    break;
+                }
+            }
         }
 
-        $this->output->writeln('<info>Writing packages.json</info>');
-        $repoJson = new JsonFile($this->filename);
-        $repoJson->write($repo);
+        return $replacements;
     }
+
 }
