@@ -67,13 +67,20 @@ EOT
          */
         $files = $this->findFilesForUpload((string)$uploadDir);
 
+        $packageJson = null;
         $output->writeln("\n<options=bold,underscore>About to Publish following files ...</>");
         foreach ($files as $file) {
             $output->writeln("\t$file");
 
+            if(preg_match('/.json$/', $file, $fileMatches)) {
+                preg_match('/version-(.*).json$/', $file, $packageVersion);
+                $packageJson = new JsonFile($file);
+                $packageJson = $packageJson->read();
+            }
+
             // Build attachments to send
             $attachments[] = [
-                'contents' => base64_encode(file_get_contents($file)),
+                'contents' => file_get_contents($file),
                 'filename' => basename($file),
                 'length' => filesize($file)
             ];
@@ -97,7 +104,9 @@ EOT
             'http://localhost:3001/api/v4/projects/24/packages/composer/my_nice_package', [
                 'body' => json_encode([
                     'name' => $composer['name'],
-                    'version' => '1.1.666',
+                    'version' => $packageVersion[1],
+                    'version_data' => $packageJson[$packageVersion[1]],
+                    'shasum' => '',
                     'attachments' => $attachments,
                 ]),
                 'query' => [
