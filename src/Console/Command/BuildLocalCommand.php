@@ -1,14 +1,21 @@
 <?php
 
+/**
+ * This file is part of ochorocho/gitlab-composer.
+ *
+ * (c) ochorocho <https://github.com/ochorocho/gitlab-composer>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Gitlab\Console\Command;
 
 use Composer\Command\BaseCommand;
 use Composer\Config;
-use Composer\Config\JsonConfigSource;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
 use Composer\Package\Version\VersionParser;
-use Composer\Satis\Console\Command\BuildCommand;
 use Gitlab\Builder\ArchiveBuilder;
 use Composer\Util\ProcessExecutor;
 use Gitlab\Builder\PackagesBuilder;
@@ -21,9 +28,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * @author Jochen Roth <rothjochen@gmail.com>
- */
 class BuildLocalCommand extends BaseCommand
 {
     protected function configure()
@@ -124,8 +128,6 @@ EOT
                 $versionToBuild = $prefix . preg_replace('{(\.9{7})+}', '.x', $parsedBranch);
                 $packageVersion = $package->getVersion();
             }
-
-            var_dump($packageVersion . '!==' . $versionToBuild);
 
             if($packageVersion !== $versionToBuild) {
               unset($packages[$key]);

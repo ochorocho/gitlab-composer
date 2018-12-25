@@ -1,18 +1,19 @@
 <?php
 
+/**
+ * This file is part of ochorocho/gitlab-composer.
+ *
+ * (c) ochorocho <https://github.com/ochorocho/gitlab-composer>
+ *
+ * For the full copyright and license information, please view
+ * the LICENSE file that was distributed with this source code.
+ */
+
 namespace Gitlab\Console\Command;
 
 use Composer\Command\BaseCommand;
-use Composer\Config;
-use Composer\Config\JsonConfigSource;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
-use Composer\Satis\Builder\ArchiveBuilder;
-use Composer\Util\ProcessExecutor;
-use Gitlab\Builder\PackagesBuilder;
-use Composer\Satis\Console\Application;
-use Composer\Satis\PackageSelection\PackageSelection;
-use Composer\Util\RemoteFilesystem;
 use Seld\JsonLint\ParsingException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

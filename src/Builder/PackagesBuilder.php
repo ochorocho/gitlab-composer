@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * This file is part of ochorocho/gitlab-composer.
  *
  * (c) ochorocho <https://github.com/ochorocho/gitlab-composer>

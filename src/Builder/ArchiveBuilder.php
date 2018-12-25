@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of composer/satis.
+ * This file is part of ochorocho/gitlab-composer.
  *
- * (c) Composer <https://github.com/composer>
+ * (c) ochorocho <https://github.com/ochorocho/gitlab-composer>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
@@ -14,11 +14,6 @@ namespace Gitlab\Builder;
 use Composer\Satis\Builder\ArchiveBuilder as SatisArchiveBuilder;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * Builds the archives of the repository.
- *
- * @author James Hautot <james@rezo.net>
- */
 class ArchiveBuilder extends SatisArchiveBuilder
 {
     /**
