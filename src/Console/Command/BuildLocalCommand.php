@@ -100,7 +100,13 @@ EOT
 
         $versionParser = new VersionParser;
 
-        $parsedBranch = $versionParser->normalize($input->getOption('version-to-dump'));
+        try {
+            $parsedBranch = $versionParser->normalize($input->getOption('version-to-dump'));
+
+        } catch (\Exception $e) {
+            $parsedBranch = $versionParser->normalizeBranch($input->getOption('version-to-dump'));
+        }
+
         $parsedBranch = str_replace('== ', '', $parsedBranch);
 
         foreach ($packages as $key => $package) {
@@ -118,6 +124,8 @@ EOT
                 $versionToBuild = $prefix . preg_replace('{(\.9{7})+}', '.x', $parsedBranch);
                 $packageVersion = $package->getVersion();
             }
+
+            var_dump($packageVersion . '!==' . $versionToBuild);
 
             if($packageVersion !== $versionToBuild) {
               unset($packages[$key]);

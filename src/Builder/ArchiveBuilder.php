@@ -11,12 +11,7 @@
 
 namespace Gitlab\Builder;
 
-use Composer\Composer;
-use Composer\Factory;
-use Composer\Util\Filesystem;
 use Composer\Satis\Builder\ArchiveBuilder as SatisArchiveBuilder;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
