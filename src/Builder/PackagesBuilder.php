@@ -1,9 +1,9 @@
 <?php
 
 /*
- * This file is part of composer/satis.
+ * This file is part of ochorocho/gitlab-composer.
  *
- * (c) Composer <https://github.com/composer>
+ * (c) ochorocho <https://github.com/ochorocho/gitlab-composer>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
@@ -11,11 +11,9 @@
 
 namespace Gitlab\Builder;
 
-use Composer\Satis\Builder\Builder;
 use Composer\Satis\Builder\PackagesBuilder as SatisPackagesBuilder;
 use Composer\Json\JsonFile;
 use Composer\Package\Dumper\ArrayDumper;
-use Composer\Util\Filesystem;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -115,6 +113,7 @@ class PackagesBuilder extends SatisPackagesBuilder
      *
      * @param array $packages List of packages to dump
      * @param string $includesUrl The includes url (optionally containing %hash%)
+     * @param OutputInterface $output The output instance
      * @param string $hashAlgorithm Hash algorithm {@see hash()}
      *
      * @return array The object for includes key in packages.json
@@ -129,15 +128,6 @@ class PackagesBuilder extends SatisPackagesBuilder
 
         $hash = hash($hashAlgorithm, $contents);
 
-        if (strpos($includesUrl, '%hash%') !== false) {
-            $this->writtenIncludeJsons[] = [$hash, $includesUrl];
-            $filename = str_replace('%hash%', $hash, $includesUrl);
-            if (file_exists($path = $this->outputDir . '/' . ltrim($filename, '/'))) {
-                // When the file exists, we don't need to override it as we assume,
-                // the contents satisfy the hash
-                $path = null;
-            }
-        }
         if ($path) {
 
             foreach ($packages as $package) {

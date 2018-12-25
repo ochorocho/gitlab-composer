@@ -7,7 +7,7 @@ use Composer\Config;
 use Composer\Config\JsonConfigSource;
 use Composer\Json\JsonFile;
 use Composer\Json\JsonValidationException;
-use Composer\Satis\Builder\ArchiveBuilder;
+use Gitlab\Builder\ArchiveBuilder;
 use Composer\Util\ProcessExecutor;
 use Gitlab\Builder\PackagesBuilder;
 use Composer\Satis\Console\Application;
