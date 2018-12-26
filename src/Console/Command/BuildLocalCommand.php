@@ -106,7 +106,6 @@ EOT
 
         try {
             $parsedBranch = $versionParser->normalize($input->getOption('version-to-dump'));
-
         } catch (\Exception $e) {
             $parsedBranch = $versionParser->normalizeBranch($input->getOption('version-to-dump'));
         }
@@ -123,10 +122,12 @@ EOT
             if ('dev-' === substr($parsedBranch, 0, 4) || '9999999-dev' === $parsedBranch) {
                 $versionToBuild = 'dev-' . $input->getOption('version-to-dump');
                 $packageVersion = $package->getPrettyVersion();
+
             } else {
                 $prefix = substr($input->getOption('version-to-dump'), 0, 1) === 'v' ? 'v' : '';
                 $versionToBuild = $prefix . preg_replace('{(\.9{7})+}', '.x', $parsedBranch);
                 $packageVersion = $package->getVersion();
+                $versionToBuild = preg_replace('/^v/', '$1', $versionToBuild);
             }
 
             if($packageVersion !== $versionToBuild) {
