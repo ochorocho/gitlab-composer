@@ -5,10 +5,8 @@
       "url": "./"
     }
   ],
-  "require-all": true,
   "archive": {
     "format": "tar",
-    "skip-dev": false,
     "absolute-directory": "build"
   }
 }
