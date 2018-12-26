@@ -1,4 +1,8 @@
 {
+  "config":{
+    // This is insecure, only disable https if you really have to
+    "secure-http":false
+  },
   "repositories": [
     {
       "type": "vcs",
