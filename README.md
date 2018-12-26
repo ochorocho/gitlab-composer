@@ -31,20 +31,18 @@ Configure your project build based on [Satis Schema](https://github.com/composer
 You can work with all config options available in Satis 
 
 ```json
+
 {
   "repositories": [
     {
       "type": "vcs",
-      "url": "./" // Path to repository
+      "url": "./"
     }
   ],
-  "require-all": true,
   "archive": {
-    "directory": "composer/packages", // Path in which archives are stored
     "format": "tar",
-    "prefix-url": "https://gitlab.knallimall.org", // Path to your gitlab instance
-    "skip-dev": false
-  },
-  "output-dir": "build"
+    "absolute-directory": "build"
+  }
 }
+
 ```
