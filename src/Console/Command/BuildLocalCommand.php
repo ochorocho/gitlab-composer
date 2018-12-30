@@ -104,7 +104,9 @@ EOT
          * Limit to given version/tag
          */
         $process = new ProcessExecutor($io);
-        $process->execute("git checkout " . $input->getOption('version-to-dump'), $result);
+
+        // git checkout -B "$CI_BUILD_REF_NAME" "$CI_COMMIT_SHA"
+        $process->execute("git checkout -B" . $input->getOption('version-to-dump'), $result);
         if($result == "") {
             $output->writeln("<info>Checking out version ". $input->getOption('version-to-dump') ."</info>");
         }
@@ -155,8 +157,6 @@ EOT
          */
         $packagesBuilder = new PackagesBuilder($output, null, $config, $skipErrors);
         $packagesBuilder->dump($packages);
-
-        echo "git checkout " . $input->getOption('version-to-dump');
 
     }
 
