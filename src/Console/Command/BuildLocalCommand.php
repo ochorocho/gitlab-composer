@@ -28,8 +28,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+
 class BuildLocalCommand extends BaseCommand
 {
+
     protected function configure()
     {
         $this
@@ -69,6 +71,7 @@ EOT
         $configFile = $input->getArgument('file');
         $skipErrors = (bool) $input->getOption('skip-errors');
 
+
         // load auth.json authentication information and pass it to the io interface
         $io = $this->getIO();
 
@@ -101,6 +104,10 @@ EOT
          * Limit to given version/tag
          */
         $process = new ProcessExecutor($io);
+        $process->execute("git checkout " . $input->getOption('version-to-dump'), $result);
+        if($result == "") {
+            $output->writeln("<info>Checking out version ". $input->getOption('version-to-dump') ."</info>");
+        }
 
         $versionParser = new VersionParser;
 
@@ -150,4 +157,5 @@ EOT
         $packagesBuilder->dump($packages);
 
     }
+
 }
