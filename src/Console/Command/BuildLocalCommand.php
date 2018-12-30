@@ -105,12 +105,6 @@ EOT
          */
         $process = new ProcessExecutor($io);
 
-        // git checkout -B "$CI_BUILD_REF_NAME" "$CI_COMMIT_SHA"
-        $process->execute("git checkout -B" . $input->getOption('version-to-dump'), $result);
-        if($result == "") {
-            $output->writeln("<info>Checking out version ". $input->getOption('version-to-dump') ."</info>");
-        }
-
         $versionParser = new VersionParser;
 
         try {
