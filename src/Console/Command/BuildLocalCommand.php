@@ -156,6 +156,8 @@ EOT
         $packagesBuilder = new PackagesBuilder($output, null, $config, $skipErrors);
         $packagesBuilder->dump($packages);
 
+        echo "git checkout " . $input->getOption('version-to-dump');
+
     }
 
 }
