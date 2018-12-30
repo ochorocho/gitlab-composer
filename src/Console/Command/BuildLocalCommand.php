@@ -92,6 +92,23 @@ EOT
         // disable packagist by default
         unset(Config::$defaultRepositories['packagist'], Config::$defaultRepositories['packagist.org']);
 
+        $process = new ProcessExecutor($io);
+
+        $versionParser = new VersionParser;
+
+        try {
+            $parsedBranch = $versionParser->normalize($input->getOption('version-to-dump'));
+        } catch (\Exception $e) {
+            // Checkout branch in gitlab-runner, see https://gitlab.com/gitlab-org/gitlab-ce/issues/19421
+            $CI_BUILD_REF_NAME = getenv('CI_BUILD_REF_NAME');
+            $CI_BUILD_REF = getenv('CI_BUILD_REF');
+            if(!empty($CI_BUILD_REF_NAME) && !empty($CI_BUILD_REF)) {
+                $output->writeln("<info>Checkout  $CI_BUILD_REF_NAME...</info>");
+                $process->execute('git checkout -b "' . $CI_BUILD_REF_NAME. '" "' . $CI_BUILD_REF . '"');
+            }
+            $parsedBranch = $versionParser->normalizeBranch($input->getOption('version-to-dump'));
+        }
+
         /** @var $application Application */
         $application = $this->getApplication();
         $composer = $application->getComposer(true, $config);
@@ -103,15 +120,6 @@ EOT
          * Set git repo url as source
          * Limit to given version/tag
          */
-        $process = new ProcessExecutor($io);
-
-        $versionParser = new VersionParser;
-
-        try {
-            $parsedBranch = $versionParser->normalize($input->getOption('version-to-dump'));
-        } catch (\Exception $e) {
-            $parsedBranch = $versionParser->normalizeBranch($input->getOption('version-to-dump'));
-        }
 
         $parsedBranch = str_replace('== ', '', $parsedBranch);
 
@@ -126,13 +134,6 @@ EOT
                 $versionToBuild = 'dev-' . $input->getOption('version-to-dump');
                 $packageVersion = $package->getPrettyVersion();
 
-                // Checkout branch in gitlab-runner, see https://gitlab.com/gitlab-org/gitlab-ce/issues/19421
-                $CI_BUILD_REF_NAME = getenv('CI_BUILD_REF_NAME');
-                $CI_BUILD_REF = getenv('CI_BUILD_REF');
-                if(!empty($CI_BUILD_REF_NAME) && !empty($CI_BUILD_REF)) {
-                    $output->writeln("<info>Checkout  $CI_BUILD_REF_NAME...</info>");
-                    $process->execute('git checkout -b "' . $CI_BUILD_REF_NAME. '" "' . $CI_BUILD_REF . '"');
-                }
             } else {
                 $prefix = substr($input->getOption('version-to-dump'), 0, 1) === 'v' ? 'v' : '';
                 $versionToBuild = $prefix . preg_replace('{(\.9{7})+}', '.x', $parsedBranch);
