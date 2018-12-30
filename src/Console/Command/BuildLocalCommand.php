@@ -102,10 +102,9 @@ EOT
             // Checkout branch in gitlab-runner, see https://gitlab.com/gitlab-org/gitlab-ce/issues/19421
             $CI_BUILD_REF_NAME = getenv('CI_BUILD_REF_NAME');
             $CI_BUILD_REF = getenv('CI_BUILD_REF');
-            if(!empty($CI_BUILD_REF_NAME) && !empty($CI_BUILD_REF)) {
-                $output->writeln("<info>Checkout  $CI_BUILD_REF_NAME...</info>");
-                $process->execute('git checkout -b "' . $CI_BUILD_REF_NAME. '" "' . $CI_BUILD_REF . '"');
-            }
+            $output->writeln("<info>Checkout  $CI_BUILD_REF_NAME...</info>");
+            $process->execute('git checkout -b "' . $CI_BUILD_REF_NAME. '" "' . $CI_BUILD_REF . '"');
+
             $parsedBranch = $versionParser->normalizeBranch($input->getOption('version-to-dump'));
         }
 
