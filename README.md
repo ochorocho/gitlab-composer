@@ -65,7 +65,8 @@ image: ochorocho/gitlab-composer:latest
 build:
   stage: build
   script:
-    - echo $CI_COMMIT_REF_NAME
+    - echo $CI_COMMIT_REF_NAME 
+    - git checkout -B "$CI_BUILD_REF_NAME" "$CI_BUILD_REF"     # Workaround detached head causing confusion in satis, see https://gitlab.com/gitlab-org/gitlab-ce/issues/19421
     - /gitlab-composer/gitlab-composer build-local ./satis.json --version-to-dump=$CI_COMMIT_REF_NAME
     - /gitlab-composer/gitlab-composer publish ./satis.json
 

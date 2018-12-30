@@ -110,6 +110,13 @@ EOT
         try {
             $parsedBranch = $versionParser->normalize($input->getOption('version-to-dump'));
         } catch (\Exception $e) {
+
+            $CI_BUILD_REF_NAME = getenv(CI_BUILD_REF_NAME);
+            $CI_BUILD_REF = getenv(CI_BUILD_REF);
+            if(isset($CI_BUILD_REF_NAME) && isset($CI_BUILD_REF)) {
+                $process->execute('git checkout -b "$CI_BUILD_REF_NAME" "$CI_BUILD_REF"');
+            }
+
             $parsedBranch = $versionParser->normalizeBranch($input->getOption('version-to-dump'));
         }
 
