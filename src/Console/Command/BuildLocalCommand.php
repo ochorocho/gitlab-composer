@@ -113,7 +113,7 @@ EOT
 
             $CI_BUILD_REF_NAME = getenv(CI_BUILD_REF_NAME);
             $CI_BUILD_REF = getenv(CI_BUILD_REF);
-            if(isset($CI_BUILD_REF_NAME) && isset($CI_BUILD_REF)) {
+            if(!empty($CI_BUILD_REF_NAME) && !empty($CI_BUILD_REF)) {
                 $process->execute('git checkout -b "$CI_BUILD_REF_NAME" "$CI_BUILD_REF"');
             }
 
