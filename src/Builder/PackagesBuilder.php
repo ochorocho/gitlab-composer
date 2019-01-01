@@ -131,11 +131,23 @@ class PackagesBuilder extends SatisPackagesBuilder
         if ($path) {
 
             foreach ($packages as $package) {
+
                 foreach ($package as $version) {
 
                     $path = $this->config['archive']['absolute-directory'] . '/' . $version['name'] . '/' . ltrim('version-' .$version['version'] . '.json', '/');
 
                     $ref = $version['version'];
+
+                    // TODO: Make this a seperate function
+                    $projectId = (int)getenv('CI_PROJECT_ID');
+                    $packageName = $version['name'];
+
+                    // TODO: Make this a seperate function
+                    $satisDownloadFile = parse_url($version['dist']['url']);
+                    $downloadFilePath = explode('/', $satisDownloadFile['path']);
+                    $downloadFile = array_reverse($downloadFilePath)[0];
+                    $version['dist']['url'] = "http://localhost:3001/api/v4/projects/$projectId/packages/composer/$packageName/-/$downloadFile";
+
                     $version = $repoJson->encode([$version['version'] => $version]) . "\n";
                     $this->writeToFile($path, $version);
                     $this->output->writeln("<info>wrote package version to $path >> ".$ref."</info>");
