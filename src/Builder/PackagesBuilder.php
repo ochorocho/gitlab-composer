@@ -146,7 +146,13 @@ class PackagesBuilder extends SatisPackagesBuilder
                     $satisDownloadFile = parse_url($version['dist']['url']);
                     $downloadFilePath = explode('/', $satisDownloadFile['path']);
                     $downloadFile = array_reverse($downloadFilePath)[0];
-                    $version['dist']['url'] = "http://localhost:3001/api/v4/projects/$projectId/packages/composer/$packageName/-/$downloadFile";
+                    $satisDownloadFilePort = isset($satisDownloadFile['port']) ? ':' . $satisDownloadFile['port'] : '';
+                    $version['dist']['url'] = $satisDownloadFile['scheme'] . '://' . $satisDownloadFile['host'] . $satisDownloadFilePort . "/api/v4/projects/$projectId/packages/composer/$packageName/-/$downloadFile";
+
+                    // Modify source URL to strip credentials set in runners git url
+                    $satisGitSource = parse_url($version['source']['url']);
+                    $satisGitSourcePort = isset($satisGitSource['port']) ? ':' . $satisGitSource['port'] : '';
+                    $version['source']['url'] = $satisGitSource['scheme'] . '://' . $satisGitSource['host'] . $satisGitSourcePort . $satisGitSource['path'];
 
                     $version = $repoJson->encode([$version['version'] => $version]) . "\n";
                     $this->writeToFile($path, $version);
