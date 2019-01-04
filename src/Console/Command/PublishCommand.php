@@ -62,7 +62,20 @@ EOT
     {
         $uploadDir = $input->getOption('build-upload-dir');
         $satis = $this->getSatisConfiguration($input);
-        $privateToken = getenv('PRIVATE_TOKEN');
+
+        $token = getenv('PRIVATE_TOKEN');
+        $header = "Private-Token";
+
+        if($token == false) {
+            $token = getenv('CI_JOB_TOKEN');
+            $header = "JOB-TOKEN";
+        }
+
+        if($token == false) {
+            $output->writeln("<error>Neither 'PRIVATE_TOKEN' nor 'CI_JOB_TOKEN' set. </error>");
+            return;
+        }
+
         $projectId = getenv('CI_PROJECT_ID');
         $projectUrl = parse_url(getenv('CI_PROJECT_URL'));
         $projectUrl = $projectUrl['scheme'] . "://" . $projectUrl['host'] . ':' . $projectUrl['port'];
@@ -112,16 +125,14 @@ EOT
         $response = $client->request(
             'PUT',
             $apiUrl, [
+                'headers'        => [$header => $token],
                 'body' => json_encode([
                     'name' => $composer['name'],
                     'version' => $packageVersion[1],
                     'version_data' => $packageJson[$packageVersion[1]],
                     'shasum' => '',
                     'attachments' => $attachments,
-                ]),
-                'query' => [
-                    'private_token' => $privateToken
-                ]
+                ])
             ]
         );
 
