@@ -113,6 +113,15 @@ EOT
         $composer = $composer->read();
 
         /**
+         * Respond with hint when namespace does not match package vendor name
+         */
+        $namespace = getenv('CI_PROJECT_NAMESPACE');
+        preg_match('/^'.$namespace.'\//', $composer["name"], $namespaceMatches);
+        if (empty($namespaceMatches)) {
+            $output->writeln("<warning>🔥 Keep in mind: If the package name does not match the group/namespace name it will not be display on instance endpoint</warning>");
+        }
+
+        /**
          * Build Gitlab request
          */
         $client = new Client([
