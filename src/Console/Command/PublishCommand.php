@@ -118,7 +118,7 @@ EOT
         $namespace = getenv('CI_PROJECT_NAMESPACE');
         preg_match('/^'.$namespace.'\//', $composer["name"], $namespaceMatches);
         if (empty($namespaceMatches)) {
-            $output->writeln("<warning>🔥 Keep in mind: If the package name does not match the group/namespace name it will not be display on instance endpoint</warning>");
+            $output->writeln("<warning>🔥 Keep in mind: If the package name does not match the group/namespace name it will not display on instance endpoint</warning>");
         }
 
         /**
