@@ -21,7 +21,7 @@ PRIVATE_TOKEN=YOUR_PRIVATE_TOKEN
 ## Run command
 
 ```bash
-./gitlab-composer build-local ./satis-example.json --version-to-dump=dev-develop
+./gitlab-composer build-local ./satis-example.json --version-to-dump=develop
 
 ```
 
