@@ -140,8 +140,6 @@ EOT
                 $versionToBuild = preg_replace('/^v/', '$1', $versionToBuild);
             }
 
-            echo $packageVersion .  " !== " . $versionToBuild . "\n";
-
             if($packageVersion !== $versionToBuild) {
               unset($packages[$key]);
             }
@@ -150,9 +148,6 @@ EOT
         /**
          * Download tar files
          */
-
-        var_dump($config);
-
         $downloads = new ArchiveBuilder($output, null, $config, $skipErrors);
         $downloads->setComposer($composer);
         $downloads->setInput($input);
