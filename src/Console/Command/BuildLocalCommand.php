@@ -115,6 +115,13 @@ EOT
 
         $packages = $packageSelection->select($composer, $verbose);
 
+        echo "Selection\n";
+        echo "Selection\n";
+        echo "Selection\n";
+        echo "Selection\n";
+
+        var_dump($packages);
+
         /**
          * Set git repo url as source
          * Limit to given version/tag
