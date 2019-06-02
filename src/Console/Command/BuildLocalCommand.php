@@ -120,7 +120,7 @@ EOT
         echo "Selection\n";
         echo "Selection\n";
 
-        var_dump($packages);
+        // var_dump($packages);
 
         /**
          * Set git repo url as source
@@ -163,7 +163,7 @@ EOT
         echo "Build\n";
         echo "Build\n";
         echo "Build\n";
-        var_dump($packages);
+        // var_dump($packages);
         $downloads->dump($packages);
 
         /**
