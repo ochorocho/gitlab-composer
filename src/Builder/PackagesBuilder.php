@@ -39,7 +39,7 @@ class PackagesBuilder extends SatisPackagesBuilder
         $packagesByName = [];
         $dumper = new ArrayDumper();
 
-        var_dump($packages);
+        // var_dump($packages);
 
         foreach ($packages as $package) {
             $packagesByName[$package->getName()][$package->getPrettyVersion()] = $dumper->dump($package);
@@ -141,7 +141,7 @@ class PackagesBuilder extends SatisPackagesBuilder
             echo "####################\n";
             // var_dump($packages);
             foreach ($packages as $package) {
-                var_dump($package);
+                // var_dump($package);
 
                 foreach ($package as $version) {
 
