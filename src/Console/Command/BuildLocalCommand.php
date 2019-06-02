@@ -151,6 +151,12 @@ EOT
         $downloads = new ArchiveBuilder($output, null, $config, $skipErrors);
         $downloads->setComposer($composer);
         $downloads->setInput($input);
+
+        echo "Build\n";
+        echo "Build\n";
+        echo "Build\n";
+        echo "Build\n";
+        var_dump($packages);
         $downloads->dump($packages);
 
         /**
