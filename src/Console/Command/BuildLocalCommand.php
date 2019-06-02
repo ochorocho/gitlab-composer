@@ -150,6 +150,9 @@ EOT
         /**
          * Download tar files
          */
+
+        var_dump($config);
+
         $downloads = new ArchiveBuilder($output, null, $config, $skipErrors);
         $downloads->setComposer($composer);
         $downloads->setInput($input);
