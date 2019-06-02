@@ -28,7 +28,8 @@ class ArchiveBuilder extends SatisArchiveBuilder
     {
 
         $projectUrl = parse_url(getenv('CI_PROJECT_URL'));
-        $projectUrl = $projectUrl['scheme'] . "://" . $projectUrl['host'] . ':' . $projectUrl['port'];
+        $port = isset($projectUrl['port']) ? ':' . $projectUrl['port'] : '';
+        $projectUrl = $projectUrl['scheme'] . "://" . $projectUrl['host'] . $port;
 
         $this->output = $output;
         $this->outputDir = $outputDir;
