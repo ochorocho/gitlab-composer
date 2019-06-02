@@ -147,9 +147,9 @@ EOT
                 $versionToBuild = preg_replace('/^v/', '$1', $versionToBuild);
             }
 
-            if($packageVersion !== $versionToBuild) {
-              unset($packages[$key]);
-            }
+//            if($packageVersion !== $versionToBuild) {
+//              unset($packages[$key]);
+//            }
         }
 
         /**
