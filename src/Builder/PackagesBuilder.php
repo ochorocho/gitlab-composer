@@ -128,9 +128,12 @@ class PackagesBuilder extends SatisPackagesBuilder
 
         $hash = hash($hashAlgorithm, $contents);
 
+        var_dump($path);
+
         if ($path) {
 
             foreach ($packages as $package) {
+                var_dump($package);
 
                 foreach ($package as $version) {
 
