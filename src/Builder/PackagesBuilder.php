@@ -131,34 +131,15 @@ class PackagesBuilder extends SatisPackagesBuilder
 
         $hash = hash($hashAlgorithm, $contents);
 
-        var_dump($path);
-
         if ($path) {
-            echo "####################\n";
-            echo "####################\n";
-            echo "####################\n";
-            echo "####################\n";
-            echo "####################\n";
-            // var_dump($packages);
+
             foreach ($packages as $package) {
-                // var_dump($package);
 
                 foreach ($package as $version) {
 
                     $path = $this->config['archive']['absolute-directory'] . '/' . $version['name'] . '/' . ltrim('version-' .$version['version'] . '.json', '/');
 
                     $ref = $version['version'];
-
-                    // TODO: Make this a seperate function
-                    $projectId = (int)getenv('CI_PROJECT_ID');
-                    $packageName = $version['name'];
-
-                    // TODO: Make this a seperate function
-                    $satisDownloadFile = parse_url($version['dist']['url']);
-                    $downloadFilePath = explode('/', $satisDownloadFile['path']);
-                    $downloadFile = array_reverse($downloadFilePath)[0];
-                    $satisDownloadFilePort = isset($satisDownloadFile['port']) ? ':' . $satisDownloadFile['port'] : '';
-                    $version['dist']['url'] = $satisDownloadFile['scheme'] . '://' . $satisDownloadFile['host'] . $satisDownloadFilePort . "/api/v4/projects/$projectId/packages/composer/$packageName/-/$downloadFile";
 
                     // Modify source URL to strip credentials set in runners git url
                     $satisGitSource = parse_url($version['source']['url']);

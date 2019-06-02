@@ -115,13 +115,6 @@ EOT
 
         $packages = $packageSelection->select($composer, $verbose);
 
-        echo "Selection\n";
-        echo "Selection\n";
-        echo "Selection\n";
-        echo "Selection\n";
-
-        // var_dump($packages);
-
         /**
          * Set git repo url as source
          * Limit to given version/tag
@@ -147,12 +140,11 @@ EOT
                 $versionToBuild = preg_replace('/^v/', '$1', $versionToBuild);
             }
 
+            echo $packageVersion .  " !== " . $versionToBuild . "\n";
 
-            echo $packageVersion . " !== " . $versionToBuild . "\n";
-
-//            if($packageVersion !== $versionToBuild) {
-//              unset($packages[$key]);
-//            }
+            if($packageVersion !== $versionToBuild) {
+              unset($packages[$key]);
+            }
         }
 
         /**
@@ -161,12 +153,6 @@ EOT
         $downloads = new ArchiveBuilder($output, null, $config, $skipErrors);
         $downloads->setComposer($composer);
         $downloads->setInput($input);
-
-        echo "Build\n";
-        echo "Build\n";
-        echo "Build\n";
-        echo "Build\n";
-        // var_dump($packages);
         $downloads->dump($packages);
 
         /**
