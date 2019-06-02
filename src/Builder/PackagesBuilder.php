@@ -131,7 +131,12 @@ class PackagesBuilder extends SatisPackagesBuilder
         var_dump($path);
 
         if ($path) {
-
+            echo "####################\n";
+            echo "####################\n";
+            echo "####################\n";
+            echo "####################\n";
+            echo "####################\n";
+            var_dump($packages);
             foreach ($packages as $package) {
                 var_dump($package);
 
