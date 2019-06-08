@@ -1,5 +1,7 @@
 <?php
 
+namespace Gitlab\Console\Command;
+
 /**
  * This file is part of ochorocho/gitlab-composer.
  *
@@ -9,7 +11,6 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Gitlab\Console\Command;
 
 use Composer\Command\BaseCommand;
 use Composer\Json\JsonFile;
@@ -103,7 +104,7 @@ EOT
 
             // Build attachments to send
             $attachments[] = [
-                'contents' => file_get_contents($file),
+                'contents' => base64_encode(file_get_contents($file)),
                 'filename' => basename($file),
                 'length' => filesize($file)
             ];
@@ -134,7 +135,7 @@ EOT
         $response = $client->request(
             'PUT',
             $apiUrl, [
-                'headers'        => [$header => $token],
+                'headers' => [$header => $token],
                 'body' => json_encode([
                     'name' => $composer['name'],
                     'version' => $packageVersion[1],
