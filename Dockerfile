@@ -14,7 +14,8 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
     apk del make g++ gcc binutils && \
     rm -rf /var/cache/apk/* && \
 # Link Binary
-    ln -s /gitlab-composer/gitlab-composer /usr/bin/gitlab-composer
+    ln -s /gitlab-composer/gitlab-composer /usr/bin/gitlab-composer && \
+    echo "{}" > ~/.composer/composer.json
 
 COPY . /gitlab-composer
 
