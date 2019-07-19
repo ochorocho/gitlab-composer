@@ -2,17 +2,14 @@
   "name": "ochorocho/gitlab-composer",
   "type": "project",
   "license": "GPL-3.0-only",
-  "autoload": {
-    "psr-4": {
-      "Gitlab\\": "src/"
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/ochorocho/satis.git"
     }
-  },
-  "bin": [
-    "gitlab-composer"
   ],
   "require": {
     "ext-json": "*",
-    "composer/satis": "^1.0",
-    "guzzlehttp/guzzle": "^6.3"
+    "composer/satis": "master@dev"
   }
 }

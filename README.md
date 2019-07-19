@@ -16,8 +16,6 @@ CI_PROJECT_ID=#ID_OF_PROJECT
 PRIVATE_TOKEN=YOUR_PRIVATE_TOKEN
 ```
 
-
-
 ## Run command
 
 ```bash
@@ -44,17 +42,24 @@ You can work with all config options available in Satis
 ```json
 
 {
+  "name": "vendor/project",
+  "homepage": "http://www.example.com",
   "repositories": [
     {
       "type": "vcs",
       "url": "./"
     }
   ],
+  "providers": false,
+  "output-dir": "build",
+  "output-html": false,
   "archive": {
     "format": "tar",
+    "directory": "build",
     "absolute-directory": "build"
   }
 }
+
 
 ```
 
@@ -66,9 +71,9 @@ image: ochorocho/gitlab-composer:latest
 build:
   stage: build
   script:
-    - echo $CI_COMMIT_REF_NAME 
-    - git checkout -B "$CI_BUILD_REF_NAME" "$CI_BUILD_REF"     # Workaround detached head causing confusion in satis, see https://gitlab.com/gitlab-org/gitlab-ce/issues/19421
-    - /gitlab-composer/gitlab-composer build-local ./satis.json --version-to-dump=$CI_COMMIT_REF_NAME
-    - /gitlab-composer/gitlab-composer publish ./satis.json
+    - git checkout $CI_COMMIT_REF_NAME
+    - git pull
+    - satis build --versions-only=$CI_COMMIT_REF_NAME
+    - satis publish-gitlab --project-url=$CI_PROJECT_URL --project-id=$CI_PROJECT_ID
 
 ```
