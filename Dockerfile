@@ -8,7 +8,7 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
 # Configure php.ini
     echo $'memory_limit = 1024M' >> /etc/php7/php.ini && \
 # Cleanup image
-    apk del make g++ gcc binutils curl && \
+    apk del make g++ gcc binutils curl autoconf && \
     rm -rf /var/cache/apk/* && \
     echo "{}" > ~/.composer/composer.json
 
