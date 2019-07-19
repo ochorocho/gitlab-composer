@@ -13,9 +13,9 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
 # Cleanup image
     apk del make g++ gcc binutils && \
     rm -rf /var/cache/apk/* && \
-# Link Binary
-    export PATH=$PATH:/gitlab-composer/vendor/bin && \
     echo "{}" > ~/.composer/composer.json
+
+ENV PATH="/gitlab-composer/vendor/bin:${PATH}"
 
 COPY . /gitlab-composer
 
