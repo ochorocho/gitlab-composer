@@ -4,7 +4,7 @@ FROM alpine:3.10
 RUN apk --update --no-cache --update-cache --allow-untrusted add \
     git curl php7 php7-json php7-mbstring php7-openssl php7-phar g++ make autoconf && \
     # Install Composer
-    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer --version=1.9.0 && \
     # Configure php.ini
     echo $'memory_limit = 1024M' >> /etc/php7/php.ini && \
     # Cleanup image
