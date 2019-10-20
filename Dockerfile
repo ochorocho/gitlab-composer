@@ -17,7 +17,6 @@ ENV PATH="/gitlab-composer/vendor/bin:${PATH}"
 COPY . /gitlab-composer
 COPY config.json /root/.composer/config.json
 
-
 # Install composer packages
 RUN cd /gitlab-composer && composer install
 
