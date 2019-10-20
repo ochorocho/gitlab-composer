@@ -18,6 +18,6 @@ COPY . /gitlab-composer
 COPY config.json /root/.composer/config.json
 
 # Install composer packages
-RUN cd /gitlab-composer && composer install
+RUN cd /gitlab-composer && composer install && composer clear-cache
 
 WORKDIR /gitlab-composer/
