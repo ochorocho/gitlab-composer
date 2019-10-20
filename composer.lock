@@ -148,12 +148,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ochorocho/satis.git",
-                "reference": "388d757ac743abe216ed7718ab2579edab0514bf"
+                "reference": "9defa25a3a064e3841347ec1231f1c1a94b069bf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ochorocho/satis/zipball/388d757ac743abe216ed7718ab2579edab0514bf",
-                "reference": "388d757ac743abe216ed7718ab2579edab0514bf",
+                "url": "https://api.github.com/repos/ochorocho/satis/zipball/9defa25a3a064e3841347ec1231f1c1a94b069bf",
+                "reference": "9defa25a3a064e3841347ec1231f1c1a94b069bf",
                 "shasum": ""
             },
             "require": {
@@ -218,7 +218,7 @@
                 "forum": "https://gitter.com/composer/satis",
                 "irc": "irc://freenode.net/composer"
             },
-            "time": "2019-10-20T01:56:49+00:00"
+            "time": "2019-10-20T02:13:06+00:00"
         },
         {
             "name": "composer/semver",
