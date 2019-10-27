@@ -5,16 +5,7 @@
 Generates an archive and a JSON file for a single package tag/branch.
 Does the same as Satis but only for a single package and tag.   
 
-This is using Composer and Satis in the background.
-
-:warning: To run this outside of gitlab-runner make sure you have set the following environment variables
-
-```bash
-# Example env file
-CI_PROJECT_URL=http://localhost:3001/NAMESPACE/PROJECT
-CI_PROJECT_ID=#ID_OF_PROJECT
-PRIVATE_TOKEN=YOUR_PRIVATE_TOKEN
-```
+This is using Composer and Satis.
 
 ## Run command
 
@@ -30,9 +21,15 @@ For development you need [composer](https://getcomposer.org/) installed.
 git clone https://github.com/ochorocho/gitlab-composer.git
 cd gitlab-composer/
 composer install
-
 ```
 
+Run it
+
+```bash
+vendor/bin/satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID $PRIVATE_TOKEN
+```
+
+vendor/bin/satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID $PRIVATE_TOKEN
 ## Example config
 
 Configure your project build based on [Satis Schema](https://github.com/composer/satis/blob/master/res/satis-schema.json).
@@ -74,5 +71,5 @@ build:
     - git pull
     - satis build --versions-only=$CI_COMMIT_REF_NAME
     - satis publish-gitlab --project-url=$CI_PROJECT_URL --project-id=$CI_PROJECT_ID
-
+    - satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID
 ```
