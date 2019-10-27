@@ -29,7 +29,6 @@ Run it
 vendor/bin/satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID $PRIVATE_TOKEN
 ```
 
-vendor/bin/satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID $PRIVATE_TOKEN
 ## Example config
 
 Configure your project build based on [Satis Schema](https://github.com/composer/satis/blob/master/res/satis-schema.json).
