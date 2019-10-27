@@ -69,6 +69,5 @@ build:
     - git checkout $CI_COMMIT_REF_NAME
     - git pull
     - satis build --versions-only=$CI_COMMIT_REF_NAME
-    - satis publish-gitlab --project-url=$CI_PROJECT_URL --project-id=$CI_PROJECT_ID
     - satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID
 ```
