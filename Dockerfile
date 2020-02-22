@@ -16,7 +16,8 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
     # Install composer packages
     cd /gitlab-composer && composer install --no-dev && composer clear-cache && \
     # Cleanup image
-    apk del make g++ libgcc gcc binutils curl libcurl autoconf perl && \
+    apk del make g++ libgcc gcc binutils curl libcurl autoconf perl git && \
+    rm -rf /var/cache/apk/* && \
     rm /usr/bin/composer
 
 ENV PATH="/gitlab-composer/vendor/bin:${PATH}"
