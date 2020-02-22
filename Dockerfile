@@ -1,4 +1,4 @@
-FROM alpine:3.10
+FROM alpine:3.11
 
 COPY ./composer.json /gitlab-composer/composer.json
 COPY ./composer.lock /gitlab-composer/composer.lock
