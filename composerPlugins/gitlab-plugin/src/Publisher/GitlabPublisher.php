@@ -1,20 +1,18 @@
 <?php
 declare(strict_types=1);
 /*
- * This file is part of composer/satis.
+ * This file is part of gitlab/composer-plugin.
  *
- * (c) Composer <https://github.com/composer>
+ * (c) ochorocho <https://github.com/ochorocho>
  *
  * For the full copyright and license information, please view
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\Satis\Publisher;
+namespace Gitlab\Composer\Publisher;
 
-use Composer\Composer;
 use Composer\Json\JsonFile;
 use GuzzleHttp\Client;
-use http\Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -22,15 +20,16 @@ class GitlabPublisher extends Publisher
 {
     /** @var array $authHeader Gitlab auth header. */
     protected $authHeader;
+
     /** @var integer $projectUrl Gitlab project url. */
     protected $projectUrl;
 
-    public function __construct(OutputInterface $output, string $outputDir, array $config, bool $skipErrors, InputInterface $input)
+    public function __construct(OutputInterface $output, string $buildPath, InputInterface $input)
     {
-        parent::__construct($output, $outputDir, $config, $skipErrors, $input);
+        parent::__construct($output, $buildPath, $input);
         $this->projectUrl = $this->getProjectUrl();
         $this->authHeader = $this->getAuthHeader();
-        $this->outputDir = $outputDir;
+        $this->buildPath = $buildPath;
         $this->sendPackageToGitlab();
     }
 
@@ -41,25 +40,27 @@ class GitlabPublisher extends Publisher
      */
     public function sendPackageToGitlab()
     {
-        $files = $this->findFilesToUpload($this->outputDir);
+        $files = $this->findFilesToUpload($this->buildPath);
+
         $client = new Client(['timeout' => 20.0,]);
         $attachment = $this->prepareAttachment($files['archive']);
+
         $this->uploadePackageJson($files['json'], $client, $attachment);
     }
 
     /**
      * Find all files needed for this package
      *
-     * @param $outputDir
+     * @param $buildPath
      * @return array
      */
-    public static function findFilesToUpload($outputDir)
+    public static function findFilesToUpload($buildPath)
     {
-        if (!is_dir($outputDir)) {
-            mkdir($outputDir, 0777, true);
+        if (!is_dir($buildPath)) {
+            mkdir($buildPath, 0777, true);
         }
 
-        $dirs = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($outputDir));
+        $dirs = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($buildPath));
         $files = array();
 
         foreach ($dirs as $file) {
@@ -130,7 +131,7 @@ class GitlabPublisher extends Publisher
     {
         $composer = new JsonFile($file);
         $composer = $composer->read();
-        $composer = reset($composer);
+
         $packageName = urlencode($composer['name']);
         $apiPackageJsonUrl = $this->projectUrl . '/api/v4/projects/' . $this->input->getArgument('project-id') . "/packages/composer/" . $packageName;
 

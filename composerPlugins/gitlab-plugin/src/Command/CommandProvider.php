@@ -11,6 +11,7 @@ final class CommandProvider
     {
         return [
             new GitlabPackageCommand(),
+            new GitlabPublishCommand(),
         ];
     }
 }

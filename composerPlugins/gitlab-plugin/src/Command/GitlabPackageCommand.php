@@ -28,7 +28,6 @@ final class GitlabPackageCommand extends BaseCommand
             ->setName('package')
             ->setDescription('Generate a package for Gitlab')
             ->setDefinition([
-                new InputOption('format', 'f', InputOption::VALUE_REQUIRED, 'Format of the output: text or json', 'text'),
                 new InputOption('json', 'j', InputOption::VALUE_REQUIRED, 'Composer json file', 'composer.json'),
             ])
             ->setHelp(<<<EOT
