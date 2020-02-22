@@ -1,6 +1,6 @@
 {
   "name": "ochorocho/gitlab-composer",
-  "description": "asdsadsadas",
+  "description": "Gitlab Docker container to build packages",
   "authors": [
     {
       "name": "Jochen",

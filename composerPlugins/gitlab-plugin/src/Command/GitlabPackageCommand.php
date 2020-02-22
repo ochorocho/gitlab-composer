@@ -5,15 +5,9 @@ declare(strict_types=1);
 namespace Gitlab\Composer\Command;
 
 use Composer\Command\BaseCommand;
-use Composer\Factory;
-use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
-use Composer\Package\CompletePackageInterface;
-use Composer\Package\PackageInterface;
 use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginEvents;
-use Composer\Repository\RepositoryInterface;
-use Composer\Repository\VcsRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,6 +17,10 @@ use Composer\Semver\VersionParser;
 
 final class GitlabPackageCommand extends BaseCommand
 {
+    /**
+     * @var string
+     */
+    protected $buildPath = 'build';
 
     protected function configure()
     {
@@ -51,7 +49,14 @@ EOT
 
     private function buildArchive(InputInterface $input)
     {
-        $inputArray = new ArrayInput(array('command' => 'archive', '--dir' => './tmp/', '--format' => 'tar'));
+        $versionDetails = $this->getPackageDetails($input);
+
+        $inputArray = new ArrayInput([
+            'command' => 'archive',
+            '--dir' => './',
+            '--format' => 'tar',
+            '--file' => $versionDetails['output_path_filename']
+        ]);
         $application = new Application();
         $application->setAutoExit(false);
 
@@ -61,19 +66,26 @@ EOT
         $application->run($inputArray);
     }
 
-    private function buildJson(InputInterface $input)
+    /**
+     * Build json file for upload to Gitlab
+     *
+     * @param InputInterface $input
+     * @return string
+     * @throws \Exception
+     */
+    private function buildJson(InputInterface $input) : void
     {
         $io = $this->getIO();
         $io->write('Creating JSON Metadata file ...');
 
-        $json = new JsonFile($input->getOption('json'));
-        $json = $json->read();
-        $outputJson = new JsonFile('tmp/single-package.json');
+        $versionDetails = $this->getPackageDetails($input);
+        $json = $versionDetails['raw_composer'];
 
-        $versionDetails = $this->getPackageDetails();
+        $outputJson = new JsonFile($versionDetails['output_path_filename'] . '.json');
 
         $json['version'] = $versionDetails['version'];
         $json['version_normalized'] = $versionDetails['version_normalized'];
+        $json['time'] = $versionDetails['time'];
         $json['source'] = [
             'type' => 'git',
             'url' => $versionDetails['repository_url'],
@@ -83,11 +95,11 @@ EOT
             'type' => 'tar',
             'url' => 'http://www.example.com/build/composer/satis/composer-satis-1.0.0-alpha3-e9b2d8.tar',
             'reference' => $versionDetails['commit_sha'],
-            'shasum' => $versionDetails['file_sha'],
+            'shasum' => $this->getArchiveSha($versionDetails['output_path_filename']),
         ];
 
         $outputJson->write($json);
-//        $outputJson->validateSchema();
+        $outputJson->validateSchema(JsonFile::LAX_SCHEMA);
     }
 
     /**
@@ -98,26 +110,40 @@ EOT
      * Repository URL:  CI_REPOSITORY_URL
      * Commit sha:      CI_COMMIT_SHA
      *
+     * @param array $json
      * @return array
      */
-    private function getPackageDetails() : array
+    private function getPackageDetails(InputInterface $input) : array
     {
+        $json = new JsonFile($input->getOption('json'));
+        $json = $json->read();
         $versionParser = new VersionParser();
         $version = [];
         $tag = getenv('CI_COMMIT_TAG');
         $branch = getenv('CI_COMMIT_REF_NAME');
         $url = getenv('CI_REPOSITORY_URL');
         $sha = getenv('CI_COMMIT_SHA');
-        $shasum = hash_file('sha256', './tmp/ochorocho-gitlab-composer-383ed84fc9d47bc32a39c151048ebebba52aea05-4377e8.tar');
         $envVersion = !empty($tag) ? $tag : $branch;
         $normalizedVersion = !empty($tag) ? $versionParser->normalize($tag) : $versionParser->normalizeBranch($branch);
+        $shaShort = substr($sha,0,7);
+        $outputPath = $this->buildPath . '/' . str_replace('/', '-', $json['name']) . '-' . $envVersion . '-' . $shaShort;
 
         $version['version'] = $envVersion;
         $version['version_normalized'] = $normalizedVersion;
         $version['repository_url'] = $url;
         $version['commit_sha'] = $sha;
-        $version['file_sha'] = $shasum;
+        $version['output_path_filename'] = $outputPath;
+        $version['raw_composer'] = $json;
+        $version['time'] = gmDate(DATE_ATOM);
 
         return $version;
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    private function getArchiveSha(string $path) : string {
+        return hash_file('sha256', $path . '.tar');
     }
 }
