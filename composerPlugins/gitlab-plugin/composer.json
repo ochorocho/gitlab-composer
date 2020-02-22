@@ -1,0 +1,17 @@
+{
+  "name": "gitlab/composer-plugin",
+  "license": "MIT",
+  "type": "composer-plugin",
+  "description": "Composer plugin for Gitlab to export archive, json files and publish to gitlab",
+  "require": {
+    "composer-plugin-api": "^1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Gitlab\\Composer\\": "src/"
+    }
+  },
+  "extra": {
+    "class": "Gitlab\\Composer\\Plugin"
+  }
+}

@@ -1,15 +1,23 @@
 {
   "name": "ochorocho/gitlab-composer",
-  "type": "project",
-  "license": "GPL-3.0-only",
-  "repositories": [
+  "description": "asdsadsadas",
+  "authors": [
     {
-      "type": "vcs",
-      "url": "https://github.com/ochorocho/satis.git"
+      "name": "Jochen",
+      "email": "rothjochen@gmail.com"
     }
   ],
+  "type": "project",
+  "license": "GPL-3.0-only",
+  "repositories": {
+    "composerPlugins": {
+      "type": "path",
+      "url": "./composerPlugins/*"
+    }
+  },
   "require": {
     "ext-json": "*",
-    "composer/satis": "master@dev"
+    "composer/composer": "^1.9",
+    "gitlab/composer-plugin": "@dev"
   }
 }

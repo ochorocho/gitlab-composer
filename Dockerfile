@@ -2,6 +2,7 @@ FROM alpine:3.10
 
 COPY ./composer.json /gitlab-composer/composer.json
 COPY ./composer.lock /gitlab-composer/composer.lock
+COPY ./composerPlugins /gitlab-composer/composerPlugins
 
 # Install PHP + mods
 RUN apk --update --no-cache --update-cache --allow-untrusted add \
