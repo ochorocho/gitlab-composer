@@ -137,8 +137,10 @@ EOT
         $tag = getenv('CI_COMMIT_TAG');
         $url = getenv('CI_REPOSITORY_URL');
         $sha = getenv('CI_COMMIT_SHA');
+        $versionParser = new VersionParser();
+        $branch = $versionParser->normalizeBranch(getenv('CI_COMMIT_REF_NAME'));
+        $envVersion = !empty($tag) ? $tag : $branch;
 
-        $envVersion = !empty($tag) ? $tag : getenv('CI_COMMIT_REF_NAME');
         $repository = $repository->findPackage($json['name'], $envVersion);
         $repositoryVersion = $repository->getPrettyVersion();
         $normalizedVersion = $repository->getVersion();
