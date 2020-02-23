@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Composer\Console\Application;
 use Composer\Semver\VersionParser;
+use Symfony\Component\Process\Process;
 
 final class GitlabPackageCommand extends BaseCommand
 {
@@ -73,7 +74,10 @@ EOT
         $application->setAutoExit(false);
 
         $io = $this->getIO();
-        $io->write('Creating Package ...');
+
+        $name = $this->versionDetails['raw_composer']['name'];
+        $version = $this->versionDetails['version'];
+        $io->write("Creating Package $name / $version");
 
         $application->run($inputArray);
     }
@@ -85,14 +89,12 @@ EOT
      * @return string
      * @throws \Exception
      */
-    private function buildJson(InputInterface $input) : void
+    private function buildJson(InputInterface $input): void
     {
-        $io = $this->getIO();
-        $io->write('Creating JSON Metadata file ...');
-
         $versionDetails = $this->versionDetails;
         $json = $versionDetails['raw_composer'];
-
+        $io = $this->getIO();
+        $io->write('Creating JSON Metadata file ' . $versionDetails['output_path_filename'] . '.json  ...');
         $outputJson = new JsonFile($versionDetails['output_path_filename'] . '.json');
 
         $json['version'] = $versionDetails['version'];
@@ -125,7 +127,7 @@ EOT
      * @param InputInterface $input
      * @return array
      */
-    private function getPackageDetails(InputInterface $input) : array
+    private function getPackageDetails(InputInterface $input): array
     {
         $io = new NullIO();
         $config = Factory::createConfig();
@@ -141,10 +143,12 @@ EOT
         $branch = $versionParser->normalizeBranch(getenv('CI_COMMIT_REF_NAME'));
         $envVersion = !empty($tag) ? $tag : $branch;
 
+        $this->prepareRepo($tag);
+
         $repository = $repository->findPackage($json['name'], $envVersion);
         $repositoryVersion = $repository->getPrettyVersion();
         $normalizedVersion = $repository->getVersion();
-        $shaShort = substr($sha,0,7);
+        $shaShort = substr($sha, 0, 7);
         $outputPath = $this->buildPath . '/' . str_replace('/', '-', $json['name']) . '-' . $repositoryVersion . '-' . $shaShort;
 
         $version = [];
@@ -163,7 +167,26 @@ EOT
      * @param string $path
      * @return string
      */
-    private function getArchiveSha(string $path) : string {
+    private function getArchiveSha(string $path): string
+    {
         return hash_file('sha256', $path . '.tar');
+    }
+
+    /**
+     * @param $tag
+     */
+    private function prepareRepo($tag): void
+    {
+        $fetch = new Process(['git fetch --unshallow || true']);
+        $fetch->run();
+        $pull = new Process(['git', 'pull', 'origin']);
+        $pull->run();
+
+        if (empty($tag)) {
+            $checkout = new Process(['git', 'checkout', getenv('CI_COMMIT_REF_NAME')]);
+        } else {
+            $checkout = new Process(['git', 'checkout', "tags/$tag", '-b', "$tag-branch"]);
+        }
+        $checkout->run();
     }
 }
