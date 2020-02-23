@@ -3,14 +3,14 @@
 ## What it does
 
 Generates an archive and a JSON file for a single package tag/branch.
-Does the same as Satis but only for a single package and tag.   
+This is using Composer and a composer plugin to package and publish to Gitlab.
 
-This is using Composer and Satis.
-
-## Run command
+## Run command in Docker Container
 
 ```bash
-./vendor/bin/satis build --versions-only=master
+docker run --rm -it --entrypoint "ash" ochorocho/gitlab-composer:3.0.0
+composer package
+composer publish http://<GITLAB IP>:3000/ <project id> <private token>
 ```
 
 ## Development
@@ -26,48 +26,20 @@ composer install
 Run it
 
 ```bash
-vendor/bin/satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID $PRIVATE_TOKEN
-```
-
-## Example config
-
-Configure your project build based on [Satis Schema](https://github.com/composer/satis/blob/master/res/satis-schema.json).
-You can work with all config options available in Satis 
-
-```json
-
-{
-  "name": "vendor/project",
-  "homepage": "http://www.example.com",
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "./"
-    }
-  ],
-  "providers": false,
-  "output-dir": "build",
-  "output-html": false,
-  "archive": {
-    "format": "tar",
-    "directory": "build",
-    "absolute-directory": "build"
-  }
-}
-
-
+vendor/bin/composer package # create package in build folder
+vendor/bin/composer publish http://<GITLAB IP>:3000/ <project id> <private token> # publish package to gitlab instance
 ```
 
 ### Example `.gitlab-ci.yml`
 
-```yaml
-image: ochorocho/gitlab-composer:latest
+Runners `$CI_JOB_TOKEN` variable is used to authenticate against Gitlab API.
 
+```yaml
+image: ochorocho/gitlab-composer:3.0.0
 build:
   stage: build
+  when: always
   script:
-    - git checkout $CI_COMMIT_REF_NAME
-    - git pull
-    - satis build --versions-only=$CI_COMMIT_REF_NAME
-    - satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID
+    - composer package
+    - composer publish $CI_PROJECT_URL $CI_PROJECT_ID
 ```
