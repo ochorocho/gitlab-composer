@@ -4,3 +4,5 @@ vendor
 /build/
 /.env
 /tmp
+/.htaccess
+/cache

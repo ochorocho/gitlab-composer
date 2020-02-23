@@ -25,6 +25,18 @@ final class GitlabPackageCommand extends BaseCommand
      */
     protected $buildPath = 'build';
 
+    /**
+     * @var array
+     */
+    protected $versionDetails = [];
+
+    protected function initialize(InputInterface $input, OutputInterface $output)
+    {
+        parent::initialize($input, $output);
+
+        $this->versionDetails = $this->getPackageDetails($input);
+    }
+
     protected function configure()
     {
         $this
@@ -51,13 +63,11 @@ EOT
 
     private function buildArchive(InputInterface $input)
     {
-        $versionDetails = $this->getPackageDetails($input);
-
         $inputArray = new ArrayInput([
             'command' => 'archive',
             '--dir' => './',
             '--format' => 'tar',
-            '--file' => $versionDetails['output_path_filename']
+            '--file' => $this->versionDetails['output_path_filename']
         ]);
         $application = new Application();
         $application->setAutoExit(false);
@@ -80,7 +90,7 @@ EOT
         $io = $this->getIO();
         $io->write('Creating JSON Metadata file ...');
 
-        $versionDetails = $this->getPackageDetails($input);
+        $versionDetails = $this->versionDetails;
         $json = $versionDetails['raw_composer'];
 
         $outputJson = new JsonFile($versionDetails['output_path_filename'] . '.json');
@@ -112,7 +122,7 @@ EOT
      * Repository URL:  CI_REPOSITORY_URL
      * Commit sha:      CI_COMMIT_SHA
      *
-     * @param array $json
+     * @param InputInterface $input
      * @return array
      */
     private function getPackageDetails(InputInterface $input) : array

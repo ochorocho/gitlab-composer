@@ -25,6 +25,7 @@ For development you need [composer](https://getcomposer.org/) installed.
 git clone https://github.com/ochorocho/gitlab-composer.git
 cd gitlab-composer/
 composer install
+export COMPOSER_HOME=/path-to/gitlab-composer/ # If not set, plugin is not loaded
 ```
 
 ### Structure
