@@ -2,8 +2,10 @@
 
 ## What it does
 
-Generates an archive and a JSON file for a single package tag/branch.
-This is using Composer and a composer plugin to package and publish to Gitlab.
+Generates an archive and a JSON file for a single package tag/branch
+using Composer and a composer plugin `gitlab/composer-plugin` to package and publish to Gitlab.
+It uses the `composer archive` command the build a package of the given Branch/Tag.
+
 
 ## Run command in Docker Container
 
@@ -17,13 +19,26 @@ composer publish http://<GITLAB IP>:3000/ <project id> <private token>
 
 For development you need [composer](https://getcomposer.org/) installed.
 
+### Install
+
 ```bash
 git clone https://github.com/ochorocho/gitlab-composer.git
 cd gitlab-composer/
 composer install
 ```
 
-Run it
+### Structure
+
+```
+gitlab-composer
+└── composerPlugins             
+    └── gitlab-plugin      # Composer Plugin
+        └── src
+            ├── Command    # Contains Additional commands
+            └── Publisher  # Code for `composer publish` command
+```
+
+### Run it
 
 ```bash
 vendor/bin/composer package # create package in build folder
