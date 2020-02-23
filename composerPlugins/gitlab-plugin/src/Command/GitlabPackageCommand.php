@@ -182,11 +182,11 @@ EOT
         $pull = new Process(['git', 'pull', 'origin']);
         $pull->run();
 
-        if (empty($tag)) {
-            $checkout = new Process(['git', 'checkout', getenv('CI_COMMIT_REF_NAME')]);
-        } else {
-            $checkout = new Process(['git', 'checkout', "tags/$tag", '-b', "$tag-branch"]);
-        }
-        $checkout->run();
+//        if (empty($tag)) {
+//            $checkout = new Process(['git', 'checkout', getenv('CI_COMMIT_REF_NAME')]);
+//        } else {
+//            $checkout = new Process(['git', 'checkout', "tags/$tag", '-b', "$tag-branch"]);
+//        }
+//        $checkout->run();
     }
 }
