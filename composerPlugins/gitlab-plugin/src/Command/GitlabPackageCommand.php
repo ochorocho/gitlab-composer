@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Gitlab\Composer\Command;
 
 use Composer\Command\BaseCommand;
+use Composer\Factory;
+use Composer\IO\NullIO;
 use Composer\Json\JsonFile;
 use Composer\Plugin\CommandEvent;
 use Composer\Plugin\PluginEvents;
+use Composer\Repository\VcsRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -114,20 +117,26 @@ EOT
      */
     private function getPackageDetails(InputInterface $input) : array
     {
+        $io = new NullIO();
+        $config = Factory::createConfig();
+        $io->loadConfiguration($config);
+        $repository = new VcsRepository(['url' => './', 'type' => 'git'], $io, $config);
+
         $json = new JsonFile($input->getOption('json'));
         $json = $json->read();
-        $versionParser = new VersionParser();
-        $version = [];
         $tag = getenv('CI_COMMIT_TAG');
-        $branch = getenv('CI_COMMIT_REF_NAME');
         $url = getenv('CI_REPOSITORY_URL');
         $sha = getenv('CI_COMMIT_SHA');
-        $envVersion = !empty($tag) ? $tag : $branch;
-        $normalizedVersion = !empty($tag) ? $versionParser->normalize($tag) : $versionParser->normalizeBranch($branch);
-        $shaShort = substr($sha,0,7);
-        $outputPath = $this->buildPath . '/' . str_replace('/', '-', $json['name']) . '-' . $envVersion . '-' . $shaShort;
 
-        $version['version'] = $envVersion;
+        $envVersion = !empty($tag) ? $tag : getenv('CI_COMMIT_REF_NAME');
+        $repository = $repository->findPackage($json['name'], $envVersion);
+        $repositoryVersion = $repository->getPrettyVersion();
+        $normalizedVersion = $repository->getVersion();
+        $shaShort = substr($sha,0,7);
+        $outputPath = $this->buildPath . '/' . str_replace('/', '-', $json['name']) . '-' . $repositoryVersion . '-' . $shaShort;
+
+        $version = [];
+        $version['version'] = $repositoryVersion;
         $version['version_normalized'] = $normalizedVersion;
         $version['repository_url'] = $url;
         $version['commit_sha'] = $sha;
