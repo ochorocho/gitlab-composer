@@ -20,6 +20,7 @@ RUN apk --update --no-cache --update-cache --allow-untrusted add \
     apk del make g++ libgcc gcc binutils curl libcurl autoconf perl && \
     rm /usr/bin/composer
 
+# Make sure composer plugin gets loaded
 ENV COMPOSER_HOME=/gitlab-composer
 ENV PATH="/gitlab-composer/vendor/bin:${PATH}"
 
