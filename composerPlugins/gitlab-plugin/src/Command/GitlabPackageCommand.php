@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Composer\Console\Application;
 use Composer\Semver\VersionParser;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 final class GitlabPackageCommand extends BaseCommand
@@ -177,16 +178,30 @@ EOT
      */
     private function prepareRepo($tag): void
     {
-        $fetch = new Process(['git fetch --unshallow || true']);
+        $io = $this->getIO();
+        $fetch = new Process(['git', 'fetch', '--unshallow']);
         $fetch->run();
-        $pull = new Process(['git', 'pull', 'origin']);
-        $pull->run();
+        $io->write('Fetch ...' . $fetch->getOutput());
 
-//        if (empty($tag)) {
-//            $checkout = new Process(['git', 'checkout', getenv('CI_COMMIT_REF_NAME')]);
-//        } else {
-//            $checkout = new Process(['git', 'checkout', "tags/$tag", '-b', "$tag-branch"]);
-//        }
-//        $checkout->run();
+
+        if (empty($tag)) {
+            $pull = new Process(['git', 'pull', 'origin', getenv('CI_COMMIT_REF_NAME')]);
+            $pull->run();
+            if (!$pull->isSuccessful()) {
+                throw new ProcessFailedException($pull);
+            }
+
+            $io->write($pull->getOutput());
+
+            $checkout = new Process(['git', 'checkout', getenv('CI_COMMIT_REF_NAME')]);
+        } else {
+            $checkout = new Process(['git', 'checkout', "tags/$tag", '-b', "$tag-branch"]);
+        }
+
+        $checkout->run();
+        if (!$checkout->isSuccessful()) {
+            throw new ProcessFailedException($checkout);
+        }
+        $io->write($checkout->getOutput());
     }
 }
