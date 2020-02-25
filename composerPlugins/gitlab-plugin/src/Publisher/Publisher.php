@@ -38,4 +38,52 @@ abstract class Publisher
         $this->input = $input;
         $this->buildPath = $buildPath;
     }
+
+    /**
+     * @return OutputInterface
+     */
+    public function getOutput(): OutputInterface
+    {
+        return $this->output;
+    }
+
+    /**
+     * @param OutputInterface $output
+     */
+    public function setOutput(OutputInterface $output): void
+    {
+        $this->output = $output;
+    }
+
+    /**
+     * @return InputInterface
+     */
+    public function getInput(): InputInterface
+    {
+        return $this->input;
+    }
+
+    /**
+     * @param InputInterface $input
+     */
+    public function setInput(InputInterface $input): void
+    {
+        $this->input = $input;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBuildPath(): string
+    {
+        return $this->buildPath;
+    }
+
+    /**
+     * @param string $buildPath
+     */
+    public function setBuildPath(string $buildPath): void
+    {
+        $this->buildPath = $buildPath;
+    }
 }

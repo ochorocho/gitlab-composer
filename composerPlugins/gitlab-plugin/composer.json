@@ -1,18 +1,23 @@
 {
-  "name": "gitlab/composer-plugin",
-  "license": "MIT",
-  "type": "composer-plugin",
-  "description": "Composer plugin for Gitlab to export archive, json files and publish to gitlab",
-  "require": {
-    "composer-plugin-api": "^1.1",
-    "guzzlehttp/guzzle": "^6.5"
-  },
-  "autoload": {
-    "psr-4": {
-      "Gitlab\\Composer\\": "src/"
+    "name": "gitlab/composer-plugin",
+    "license": "MIT",
+    "type": "composer-plugin",
+    "description": "Composer plugin for Gitlab to export archive, json files and publish to gitlab",
+    "require": {
+        "composer/composer": "^1.9",
+        "composer-plugin-api": "^1.1",
+        "guzzlehttp/guzzle": "^6.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Gitlab\\Composer\\": "src/"
+        }
+    },
+    "extra": {
+        "class": "Gitlab\\Composer\\Plugin"
+    },
+    "require-dev": {
+        "codeception/codeception": "^4.1",
+        "codeception/module-asserts": "^1.0.0"
     }
-  },
-  "extra": {
-    "class": "Gitlab\\Composer\\Plugin"
-  }
 }

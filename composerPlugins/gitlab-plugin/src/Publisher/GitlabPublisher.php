@@ -152,7 +152,7 @@ class GitlabPublisher extends Publisher
                 ]
             );
 
-            if ($response->getStatusCode() == 200) {
+            if ($response->getStatusCode() === 200) {
                 $this->output->writeln('<info>Package ' . $composer['name'] . ' ' . $composer['version'] . ' published ...</info>');
             } else {
                 $this->output->writeln('<error>Couldn\'t upload package ' . $composer['name'] . ' ' . $composer['version'] . ' ...</error>');
