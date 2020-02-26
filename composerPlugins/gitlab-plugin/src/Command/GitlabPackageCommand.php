@@ -183,7 +183,6 @@ EOT
         $fetch->run();
         $io->write('Fetch ...' . $fetch->getOutput());
 
-
         if (empty($tag)) {
             $pull = new Process(['git', 'pull', 'origin', getenv('CI_COMMIT_REF_NAME')]);
             $pull->run();
