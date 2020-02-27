@@ -2,64 +2,86 @@
 
 namespace Gitlab;
 
-use Codeception\Stub;
 use Codeception\Test\Unit;
 use Codeception\Util\Debug;
-use Gitlab\Composer\Publisher\GitlabPublisher;
-use Symfony\Component\Console\Tester\CommandTester;
+use Gitlab\Composer\Service\GitlabPublisher;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
 
-//use Symfony\Component\Console\Output\OutputInterface;
-//use Symfony\Component\Console\Input\InputInterface;
 
 class GitlabPublisherTest extends Unit
 {
-    /** @var OutputInterface $output The output Interface. */
-    protected $output;
-    /** @var InputInterface */
-    protected $input;
-    /** @var string $buildPath Path where files are stored. */
-    protected $buildPath;
+    private $publisher;
 
     protected function _before()
     {
-
+        parent::_before();
+        $this->publisher = $this->make('\Gitlab\Composer\Service\GitlabPublisher');
     }
 
-    public function testGitlabPublisher()
+    public function testGetProjectUrl()
     {
+        $url = $this->publisher->getProjectUrl('https://example.com/');
+        $urlNoSlash = $this->publisher->getProjectUrl('https://example.com');
+        $portUrl = $this->publisher->getProjectUrl('https://example.com:8080/');
 
+        $this->assertEquals('https://example.com', $url);
+        $this->assertEquals('https://example.com', $urlNoSlash);
+        $this->assertEquals('https://example.com:8080', $portUrl);
 
-//        $publisher = $this->make('\Gitlab\Composer\Publisher\GitlabPublisher', ['buildPath' => 'build', 'output' => $this->output]);
-//        $output = new OutputInterface();
+        codecept_debug($this->publisher);
+    }
 
-//        $output = $this->getMockBuilder(Symfony\Component\Console\Output\OutputInterface::class)->getMock();
-        $output = $this->makeEmpty('\Symfony\Component\Console\Output\OutputInterface');
-//        $input = $this->getMockBuilder(Symfony\Component\Console\Input\InputInterface::class)->getMock();
-//        $input = $this->make('\Symfony\Component\Console\Input\InputInterface', ['buildPath' => 'build', 'output' => 'sadasdsa']);
-        $input = $this->makeEmpty('\Symfony\Component\Console\Input\InputInterface',
-            ['buildPath' => 'build', 'project-url' => 'https://exmaple.com/']);
+    public function testPrepareAttachment() {
+        $attachment = $this->publisher->prepareAttachment('/Users/jochen/php-projekt-data/gitlab-composer/composerPlugins/gitlab-plugin/tests/fixtures/package.json');
 
-//        $input = new \Symfony\Component\Console\Input\InputInterface();
-//        $input->setArgument('project-url', 'http://www.google.de');
+        $this->assertEquals('package.json', $attachment['filename']);
+        $this->assertEquals('1437', $attachment['length']);
 
-//        $commandTester = new CommandTester('package');
+        codecept_debug($attachment);
+    }
 
-//        $input->argument = ['project-url' => 'www.example.com'];
-//        $this->input->getArgument('project-url');
+    public function testGetAuthHeader() {
+        $authHeader = $this->publisher->getAuthHeader('PRIVATE_TOKEN');
 
-//        codecept_debug($input);
-        $publisher = new GitlabPublisher($output, 'build', $input);
+        $this->assertEquals('application/json', $authHeader['content-type']);
+        $this->assertEquals('application/json', $authHeader['Accept']);
+        $this->assertEquals('PRIVATE_TOKEN', $authHeader['Private-Token']);
 
-//        var_dump($publisher);
+        codecept_debug($authHeader);
+    }
 
-        codecept_debug($publisher->setBuildPath('########'));
-        codecept_debug($publisher->getBuildPath());
-//        $this->assertEquals('build', $publisher->getBuildPath());
-//        $this->assertEmpty($publisher->setBuildPath('hooray'));
-//        $this->assertEmpty($publisher->setBuildPath('hooray'));
+    public function testFindFilesToUpload() {
+        $files = $this->publisher->findFilesToUpload(__DIR__ . '/fixtures/');
 
-//        codecept_debug($output);
-//        codecept_debug($input);
-//        codecept_debug($publisher);
+        $this->assertEquals(__DIR__ . '/fixtures/package.json', $files['json']);
+        $this->assertEquals(__DIR__ . '/fixtures/package.tar', $files['archive']);
+
+        codecept_debug($files);
+    }
+
+    public function testUploadJson() {
+        $mock = new MockHandler([
+            new Response(200, ['X-Foo' => 'Bar'], 'Hello, World'),
+            new RequestException('Error Communicating with Server', new Request('GET', 'test'))
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+        $client = new Client(['handler' => $handlerStack]);
+
+        $attachment = $this->publisher->prepareAttachment(__DIR__ . '/fixtures/package.tar');
+        $response = $this->publisher->uploadPackageJson(__DIR__ . '/fixtures/package.json', $client, $attachment, 19);
+
+        $this->assertEquals('ochorocho/gitlab-composer', $response['name']);
+        $this->assertEquals('v1.x-dev', $response['version']);
+        $this->assertIsArray($response['json']);
+        $this->assertEquals('835', $response['package_file']['length']);
+        $this->assertEquals('package.tar', $response['package_file']['filename']);
+
+        codecept_debug($response);
     }
 }

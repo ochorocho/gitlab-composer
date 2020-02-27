@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Gitlab\Composer\Command;
 
 use Composer\Command\BaseCommand;
-use Gitlab\Composer\Publisher\GitlabPublisher;
-use http\Exception;
+use Gitlab\Composer\Service\GitlabPublisher;
+use GuzzleHttp\Client;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -34,10 +34,23 @@ EOT
             );
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            new GitlabPublisher($output, $this->buildPath , $input);
+            $publisher = new GitlabPublisher($this->buildPath, $input->getArgument('project-url'), $input->getArgument('private-token'));
+
+            $client = new Client(['timeout' => 20.0,]);
+
+            $files = $publisher->findFilesToUpload($this->buildPath);
+            $attachment = $publisher->prepareAttachment($files['archive']);
+            $publisher->uploadPackageJson($files['json'], $client, $attachment, $input->getArgument('project-id'));
+
+            $output->writeln('<info>Files uploaded: '. PHP_EOL . "\t" . implode(PHP_EOL . "\t", $files) . '</info>');
         } catch (\Exception $e) {
             $output->writeln('<error>Could not upload files: ' . $e . '</error>');
         }

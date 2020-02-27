@@ -9,43 +9,33 @@ declare(strict_types=1);
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Gitlab\Composer\Publisher;
+namespace Gitlab\Composer\Service;
 
 use Composer\Json\JsonFile;
 use GuzzleHttp\Client;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use phpDocumentor\Reflection\Types\Integer;
+use PHPUnit\Util\Exception;
 
-class GitlabPublisher extends Publisher
+class GitlabPublisher
 {
+    /** @var string $buildPath Path where files are stored. */
+    protected string $buildPath;
+
     /** @var array $authHeader Gitlab auth header. */
-    protected $authHeader;
+    protected array $authHeader;
 
     /** @var integer $projectUrl Gitlab project url. */
     protected $projectUrl;
 
-    public function __construct(OutputInterface $output, string $buildPath, InputInterface $input)
+    /** @var string $privateToken */
+    protected $privateToken;
+
+    public function __construct(string $buildPath, string $projectUrl, $privateToken)
     {
-        parent::__construct($output, $buildPath, $input);
-        $this->projectUrl = $this->getProjectUrl();
-        $this->authHeader = $this->getAuthHeader();
         $this->buildPath = $buildPath;
-        $this->sendPackageToGitlab();
-    }
-
-    /**
-     * Upload attachment and json metadata to Gitlab
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function sendPackageToGitlab()
-    {
-        $files = $this->findFilesToUpload($this->buildPath);
-
-        $client = new Client(['timeout' => 20.0,]);
-        $attachment = $this->prepareAttachment($files['archive']);
-
-        $this->uploadePackageJson($files['json'], $client, $attachment);
+        $this->projectUrl = $this->getProjectUrl($projectUrl);
+        $this->authHeader = $this->getAuthHeader($privateToken);
+        $this->privateToken = $privateToken;
     }
 
     /**
@@ -83,20 +73,20 @@ class GitlabPublisher extends Publisher
     /**
      * Get project url
      *
+     * @param $url
      * @return string
      */
-    private function getProjectUrl()
+    public function getProjectUrl($url) : string
     {
         try {
-            $url = $this->input->getArgument('project-url');
-
             if (!empty($url)) {
                 $projectUrl = parse_url($url);
             }
 
-            return sprintf("%s://%s:%s", $projectUrl['scheme'], $projectUrl['host'], $projectUrl['port']);
+            $port = empty($projectUrl['port']) ? '' : ':' . $projectUrl['port'];
+            return sprintf("%s://%s%s", $projectUrl['scheme'], $projectUrl['host'], $port);
         } catch (\Exception $e) {
-            $this->output->writeln($e);
+            echo $e->getMessage();
             exit;
         }
     }
@@ -105,16 +95,16 @@ class GitlabPublisher extends Publisher
      * Set Gitlab API authentication header
      *
      * @return array
+     * @throws \Exception
      */
-    private function getAuthHeader()
+    public function getAuthHeader($privateToken)
     {
-        $privateToken = $this->input->getArgument('private-token');
         $jobToken = getenv('CI_JOB_TOKEN');
         $authHeader = $privateToken ? ["Private-Token" => $privateToken] : ["JOB-TOKEN" => $jobToken];
         $mimeHeader = ['content-type' => 'application/json', 'Accept' => 'application/json'];
 
         if (empty($privateToken) && empty($jobToken)) {
-            $this->output->writeln("<error>Authentication not set. You have following options: \n * Empty will try to use 'CI_JOB_TOKEN' env var \n * Set cli option '--private-token' </error>");
+            throw new \Exception('Authentication not set. You have following options: \n * Empty will try to use \'CI_JOB_TOKEN\' env var \n * Set cli argument \'private-token\'');
         }
 
         return array_merge($mimeHeader, $authHeader);
@@ -125,15 +115,17 @@ class GitlabPublisher extends Publisher
      *
      * @param $file
      * @param Client $client
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @param array $attachment
+     * @param Integer $projectId
+     * @return array
      */
-    private function uploadePackageJson($file, Client $client, $attachment)
+    public function uploadPackageJson($file, Client $client, $attachment, $projectId) : array
     {
         $composer = new JsonFile($file);
         $composer = $composer->read();
 
         $packageName = urlencode($composer['name']);
-        $apiPackageJsonUrl = $this->projectUrl . '/api/v4/projects/' . $this->input->getArgument('project-id') . "/packages/composer/" . $packageName;
+        $apiPackageJsonUrl = $this->projectUrl . '/api/v4/projects/' . $projectId . "/packages/composer/" . $packageName;
 
         $body = [
             'name' => $composer['name'],
@@ -147,18 +139,16 @@ class GitlabPublisher extends Publisher
                 'PUT',
                 $apiPackageJsonUrl,
                 [
-                    'headers' => $this->authHeader,
+                    'headers' => $this->getAuthHeader($this->privateToken),
                     'body' => json_encode($body)
                 ]
             );
 
-            if ($response->getStatusCode() === 200) {
-                $this->output->writeln('<info>Package ' . $composer['name'] . ' ' . $composer['version'] . ' published ...</info>');
-            } else {
-                $this->output->writeln('<error>Couldn\'t upload package ' . $composer['name'] . ' ' . $composer['version'] . ' ...</error>');
+            if ($response->getStatusCode() !== 200) {
+                throw new Exception('Couldn\'t upload package ' . $composer['name'] . ' ' . $composer['version'] . ' ...');
             }
         } catch (\Exception $e) {
-            $this->output->writeln($e);
+            echo $e->getMessage();
         }
 
         return $body;
@@ -170,7 +160,7 @@ class GitlabPublisher extends Publisher
      * @param $file
      * @return array
      */
-    private function prepareAttachment($file)
+    public function prepareAttachment($file) : array
     {
         $attachment = [
             'contents' => base64_encode(file_get_contents($file)),
@@ -180,4 +170,6 @@ class GitlabPublisher extends Publisher
 
         return $attachment;
     }
+
+
 }

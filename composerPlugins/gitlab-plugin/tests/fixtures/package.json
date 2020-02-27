@@ -1,0 +1,54 @@
+{
+  "name": "ochorocho/gitlab-composer",
+  "description": "Utilized composer to generate packages and upload to gitlab",
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "php": ">=5.5.0 < 7.4",
+    "symfony/process": "^2.7 || ^3.0 || ^3.3.6 || ^3.4.4 || ^4.0",
+    "neos/utility-files": "^5.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "JoRo\\": "JoRo/"
+    }
+  },
+  "bin": [
+    "typo3reverse"
+  ],
+  "require-dev": {
+    "macfja/phar-builder": "^0.2.7",
+    "phpunit/phpunit": "^7.3"
+  },
+  "extra": {
+    "phar-builder": {
+      "compression": "GZip",
+      "name": "typo3reverse.phar",
+      "output-dir": "./",
+      "entry-point": "./typo3reverse",
+      "include": [
+        "JoRo"
+      ],
+      "include-dev": false,
+      "events": {
+        "command.build.start": "",
+        "command.build.end": [
+          "chmod +x ./typo3reverse.phar"
+        ]
+      }
+    }
+  },
+  "version": "v1.x-dev",
+  "version_normalized": "1.9999999.9999999.9999999-dev",
+  "time": "2020-02-27T20:52:48+00:00",
+  "source": {
+    "type": "git",
+    "url": "git@github.com:ochorocho/gitlab-composer.git",
+    "reference": "754499033e0519f55b59a51ced7de0d26bb76fd8"
+  },
+  "dist": {
+    "type": "tar",
+    "url": "http://www.example.com/build/composer/satis/composer-satis-1.0.0-alpha3-e9b2d8.tar",
+    "reference": "754499033e0519f55b59a51ced7de0d26bb76fd8",
+    "shasum": "eee81acc2307c923c5bbed9a9ab29f5d4e0ba23940ebd21202b450d17ed5b1ce"
+  }
+}
