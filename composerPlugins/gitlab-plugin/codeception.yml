@@ -2,7 +2,10 @@ namespace: Gitlab
 suites:
     unit:
         path: .
-
+coverage:
+    enabled: true
+    include:
+        - src/*
 settings:
     shuffle: true
     lint: true
@@ -11,4 +14,3 @@ paths:
     output: tests/_output
     support: tests/_support
     data: tests
-     
